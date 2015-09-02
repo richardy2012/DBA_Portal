@@ -57,6 +57,8 @@
 	{% set disabled = "" %}
 	{% endif %}
 	<a type="button" {{disabled}} class="btn btn-warning" onclick="apply()">申请服务器</a>
+	&nbsp;&nbsp;
+	<a type="button" {{disabled}} class="btn btn-danger" href="{{ url_for('flush_cache') }}?keys=key1:server_available&page=standby_list">刷新缓存</a>
 
 	<div hidden="hidden">
 	  &nbsp;&nbsp; | &nbsp;&nbsp;

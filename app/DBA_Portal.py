@@ -1521,6 +1521,37 @@ def query_monitor():
         flash(msg, 'danger')
         return render_template('blank.html')
 
+@app.route("/flush_cache",methods=['POST','GET'])
+def flush_cache():
+    if not have_accessed():
+        return redirect(url_for('login'))
+
+    try:    
+        supported_query_key = ['keys', 'page']
+        query_condition = get_parameters_from_url(request,supported_query_key)
+        #query_condition = add_authority_parameters(query_condition)
+
+        keys = parse_comment_string(query_condition['keys'])
+        page = query_condition['page']
+        if not page:
+            flash("404: Contact handsome, clever, creative dfcao!", 'danger')
+            return render_template('blank.html')
+
+        dba_portal_redis = DBAPortalRedis()
+        for key in keys:
+            if dba_portal_redis._redis.exists(keys[key]):
+                dba_portal_redis._redis.delete(keys[key])
+
+        flash("刷新缓存成功", 'success')
+        return render_template('blank.html')
+    #return redirect(url_for(page))
+    except Exception, e:
+        msg = "%s: %s" % (type(e).__name__, e.message)
+        app.logger.error(str(e))
+        flash(msg, 'danger')
+        return render_template('blank.html')
+
+
 @app.route("/blank")
 def blank():
     try:
