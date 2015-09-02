@@ -1721,12 +1721,20 @@ def dashboard():
         data['task_list'] = task_list
         data['page_name'] = 'Dash Board'
         data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
-        #servers = ServerList()
-        #instances = InstList()
         
         dba_portal_redis = DBAPortalRedis()
-        server_total_count = dba_portal_redis.get_server_total_count()
-        instance_total_count = dba_portal_redis.get_instance_total_count()
+        server_total_count = dba_portal_redis.get_server_total_count() if dba_portal_redis._redis.exists('server_total_count') else ''
+        instance_total_count = dba_portal_redis.get_instance_total_count() if dba_portal_redis._redis.exists('instance_total_count') else ''
+
+        server_list = ServerList()
+        instance_list = InstList()
+        if not server_total_count:
+            server_total_count = server_list.get_total_count()
+            dba_portal_redis.set_server_total_count(server_total_count)
+
+        if not instance_total_count:
+            instance_total_count = instance_list.get_total_count()
+            dba_portal_redis.set_instance_total_count(instance_total_count)
 
         data['page_data'] = dict()
         data['page_data']['server_cnt'] = server_total_count
