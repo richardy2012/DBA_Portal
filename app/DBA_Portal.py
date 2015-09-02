@@ -517,9 +517,13 @@ def standby_list():
         query_condition = get_parameters_from_url(request,supported_query_key)
 
         dba_portal_redis = DBAPortalRedis()
-        server_available = dba_portal_redis.get_server_available()
+        server_available = dba_portal_redis.get_server_available() if dba_portal_redis._redis.exists('server_available') else ''
 
-        #server_list = ServerList()
+        server_list = ServerList()
+        if not server_available:
+            server_available = server_list.list_available()
+            dba_portal_redis.set_server_available(server_available)
+
         #page_data = server_list.list_available(data=query_condition)
         page_data = server_available
         filter_form = StandbyServerInfoForm()
@@ -556,7 +560,12 @@ def server_list():
         query_condition = get_parameters_from_url(request,supported_query_key)
         
         dba_portal_redis = DBAPortalRedis()
-        server_all = dba_portal_redis.get_server_all()
+        server_all = dba_portal_redis.get_server_all() if dba_portal_redis._redis.exists('server_all') else ''
+
+        server_list = ServerList()
+        if not server_all:
+            server_all = server_list.list_all()
+            dba_portal_redis.set_server_all(server_all)
 
         #all_servers = ServerList()
         #filtered_servers = all_servers.list_all(data=query_condition)
@@ -1219,9 +1228,20 @@ def backup_center():
         return redirect(url_for('login'))
     try:
         dba_portal_redis = DBAPortalRedis()
-        backup_mha = dba_portal_redis.get_backup_mha()
-        backup_single_instance = dba_portal_redis.get_backup_single_instance()
-        backup_configure = dba_portal_redis.get_backup_configure()
+        backup_mha = dba_portal_redis.get_backup_mha() if dba_portal_redis._redis.exists('backup_mha') else ''
+        backup_single_instance = dba_portal_redis.get_backup_single_instance() if dba_portal_redis._redis.exists('backup_single_instance') else ''
+        backup_configure = dba_portal_redis.get_backup_configure() if dba_portal_redis._redis.exists('backup_configure') else ''
+
+        backup_list = BackupList()
+        if not backup_mha:
+            backup_mha = backup_list.mha()
+            dba_portal_redis.set_backup_mha(backup_mha)
+        if not backup_single_instance:
+            backup_single_instance = backup_list.single_instance()
+            dba_portal_redis.set_backup_single_instance(backup_single_instance)
+        if not backup_configure:
+            backup_configure = backup_list.configure()
+            dba_portal_redis.set_backup_configure(backup_configure)
 
         mha = sort_cluster_by_backup_status(backup_mha['mha'])
         data = {'mha':mha}
@@ -1294,9 +1314,13 @@ def backup_report():
         active = request.values.get('active','MySQL')
 
         dba_portal_redis = DBAPortalRedis()
-        #backlist = BackupList()
-        #result = backlist.email_backup_report()
-        result = dba_portal_redis.get_backup_email_backup_report()
+        backup_email_backup_report = dba_portal_redis.get_backup_email_backup_report() if dba_portal_redis._redis.exists('backup_email_backup_report') else ''
+
+        backup_list = BackupList()
+        if not backup_email_backup_report:
+            backup_email_backup_report = backup_list.email_backup_report()
+            dba_portal_redis.set_backup_email_backup_report(backup_email_backup_report)
+        result = backup_email_backup_report
         file_backup = FileBackup()
         result['File_Backup'] = file_backup.get_file_backup_info()
         server_use = file_backup.get_latest_server_use(AppConfig.FILE_BACKUP_server)
@@ -1323,8 +1347,8 @@ def backup_report():
 def email_backup_report():
     try:
         active = request.values.get('active','MySQL')
-        backlist = BackupList()
-        result = backlist.email_backup_report()
+        backup_list = BackupList()
+        result = backup_list.email_backup_report()
         file_backup = FileBackup()
         result['File_Backup'] = file_backup.get_file_backup_info()
         server_use = file_backup.get_latest_server_use(AppConfig.FILE_BACKUP_server)
