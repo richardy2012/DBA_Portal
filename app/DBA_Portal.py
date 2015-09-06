@@ -1235,13 +1235,13 @@ def backup_center():
         backup_list = BackupList()
         if not backup_mha:
             backup_mha = backup_list.mha()
-            dba_portal_redis.set_backup_mha(backup_mha)
+            #dba_portal_redis.set_backup_mha(backup_mha)
         if not backup_single_instance:
             backup_single_instance = backup_list.single_instance()
-            dba_portal_redis.set_backup_single_instance(backup_single_instance)
+            #dba_portal_redis.set_backup_single_instance(backup_single_instance)
         if not backup_configure:
             backup_configure = backup_list.configure()
-            dba_portal_redis.set_backup_configure(backup_configure)
+            #dba_portal_redis.set_backup_configure(backup_configure)
 
         mha = sort_cluster_by_backup_status(backup_mha['mha'])
         data = {'mha':mha}
