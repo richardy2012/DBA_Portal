@@ -522,7 +522,7 @@ def standby_list():
         server_list = ServerList()
         if not server_available:
             server_available = server_list.list_available()
-            dba_portal_redis.set_server_available(server_available)
+            dba_portal_redis.set_json_with_expire('server_available', server_available, dba_portal_redis._expire_server_available)
 
         #page_data = server_list.list_available(data=query_condition)
         page_data = server_available
@@ -565,7 +565,8 @@ def server_list():
         server_list = ServerList()
         if not server_all:
             server_all = server_list.list_all()
-            dba_portal_redis.set_server_all(server_all)
+            dba_portal_redis.set_json_with_expire('server_all', server_all, dba_portal_redis._expire_server_all)
+            
 
         #all_servers = ServerList()
         #filtered_servers = all_servers.list_all(data=query_condition)
@@ -1315,11 +1316,11 @@ def backup_report():
 
         dba_portal_redis = DBAPortalRedis()
         backup_email_backup_report = dba_portal_redis.get_backup_email_backup_report() if dba_portal_redis._redis.exists('backup_email_backup_report') else ''
-
         backup_list = BackupList()
         if not backup_email_backup_report:
             backup_email_backup_report = backup_list.email_backup_report()
             dba_portal_redis.set_backup_email_backup_report(backup_email_backup_report)
+
         result = backup_email_backup_report
         file_backup = FileBackup()
         result['File_Backup'] = file_backup.get_file_backup_info()
@@ -1761,11 +1762,11 @@ def dashboard():
         instance_list = InstList()
         if not server_total_count:
             server_total_count = server_list.get_total_count()
-            dba_portal_redis.set_server_total_count(server_total_count)
+            dba_portal_redis.set_json_with_expire('server_total_count', server_total_count, dba_portal_redis._expire_server_total_count)
 
         if not instance_total_count:
             instance_total_count = instance_list.get_total_count()
-            dba_portal_redis.set_instance_total_count(instance_total_count)
+            dba_portal_redis.set_json_with_expire('instance_total_count', instance_total_count, dba_portal_redis._expire_instance_total_count)
 
         data['page_data'] = dict()
         data['page_data']['server_cnt'] = server_total_count
@@ -1784,6 +1785,6 @@ def dashboard():
 
 if __name__ == "__main__":
     dba_portal_redis = DBAPortalRedis()
-    dba_portal_redis.init_dba_portal_redis()
+    dba_portal_redis.reset_dba_portal_redis()
     app.jinja_env.cache = None
     app.run(host='0.0.0.0', port=AppConfig.PORTAL_PORT)

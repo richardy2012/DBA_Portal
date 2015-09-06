@@ -18,11 +18,16 @@ class DBAPortalRedis(object):
     
     def __init__(self):
         self._redis = redis.StrictRedis(host=redispy_config.REDIS_IP, port=redispy_config.REDIS_PORT, encoding='utf-8')
+        self._expire_server_all = 120
+        self._expire_server_available = 120
+        self._expire_server_total_count = 120
+        self._expire_instance_total_count = 120
 
-    def init_dba_portal_redis(self):
-        #self._redis.flushall()
-
-        print '%s: add backup mha into redis...' % time.strftime('%Y-%m-%d %H-%M-%S')
+    def reset_dba_portal_redis(self):
+        '''
+        Reset redis data.
+        '''
+        print '%s: -- redis: reset backup data...' % time.strftime('%Y-%m-%d %H-%M-%S')        
         backup_list = BackupList()
         # backup_mha = backup_list.mha()
         # backup_mha = json.dumps(backup_mha,ensure_ascii=False)
@@ -45,36 +50,62 @@ class DBAPortalRedis(object):
         # time.sleep(3)
 
 
-        print '%s: add server data into redis...' % time.strftime('%Y-%m-%d %H-%M-%S')
+        print '%s: -- redis: reset server data...' % time.strftime('%Y-%m-%d %H-%M-%S')        
         server_list = ServerList()
         server_all = server_list.list_all()
-        server_all = json.dumps(server_all,ensure_ascii=False)
-        self._redis.set('server_all', server_all)
+        self.set_json_with_expire('server_all', server_all, self._expire_server_all)
         time.sleep(3)
         server_available = server_list.list_available()
-        server_available = json.dumps(server_available,ensure_ascii=False)
-        self._redis.set('server_available', server_available)
+        self.set_json_with_expire('server_available', server_available, self._expire_server_available)
         time.sleep(3)
         server_total_count = server_list.get_total_count()
-        server_total_count = json.dumps(server_total_count,ensure_ascii=False)
-        self._redis.set('server_total_count', server_total_count)
+        self.set_json_with_expire('server_total_count', server_total_count, self._expire_server_total_count)
         time.sleep(3)
 
-        print '%s: add instance data into redis...' % time.strftime('%Y-%m-%d %H-%M-%S')
+        print '%s: -- redis: reset instance data...' % time.strftime('%Y-%m-%d %H-%M-%S')        
         instance_list = InstList()
         instance_total_count = instance_list.get_total_count()
-        instance_total_count = json.dumps(instance_total_count,ensure_ascii=False)
-        self._redis.set('instance_total_count', instance_total_count)
+        self.set_json_with_expire('instance_total_count', instance_total_count, self._expire_instance_total_count)
         time.sleep(3)
 
         return True
+
+    def set_json_with_expire(self, key, value, expire=60):
+        '''
+        Description: reset key to json value with expire time.
+        Parameters format
+        ### key: string
+        ### value: json format data
+        ### expire: time to live $expire seconds
+        Example
+        ### set_with_expire('server', {'test':1}, 10)
+        ### server is "{\"test\": 1}}", and will live 10s
+        '''
+        if not (type(key) is str and (type(expire) is int or type(expire) is float)):
+            print "wrong parameters."
+            print "set_with_expire('server', {'test':1}, 10)"
+            return False
+
+        print '%s: ---- redis: set %s' % (time.strftime('%Y-%m-%d %H-%M-%S'), key)
+        try:
+            value = json.dumps(value,ensure_ascii=False)
+            pipeline = self._redis.pipeline()
+            pipeline.set(key, value)
+            pipeline.expire(key, expire)
+            pipeline.execute()
+            return True
+        except Exception, e: 
+            msg = "%s: %s" % (type(e).__name__, e.message) 
+            print msg
+            return False
+
 
     def get_backup_mha(self):
         backup_mha = json.loads(self._redis.get('backup_mha'))
         return backup_mha
 
     def set_backup_mha(self, data):
-        print '%s: redis set backup_mha' % time.strftime('%Y-%m-%d %H-%M-%S')
+        print '%s: ---- redis: set backup_mha' % time.strftime('%Y-%m-%d %H-%M-%S')
         backup_mha = json.dumps(data,ensure_ascii=False)
         self._redis.set('backup_mha', backup_mha)
         return backup_mha
@@ -84,7 +115,7 @@ class DBAPortalRedis(object):
         return backup_single_instance
 
     def set_backup_single_instance(self, data):
-        print '%s: redis set backup_single_instance' % time.strftime('%Y-%m-%d %H-%M-%S')
+        print '%s: ---- redis: set backup_single_instance' % time.strftime('%Y-%m-%d %H-%M-%S')
         backup_single_instance = json.dumps(data,ensure_ascii=False)
         self._redis.set('backup_single_instance', backup_single_instance)
         return backup_single_instance
@@ -94,7 +125,7 @@ class DBAPortalRedis(object):
         return backup_configure
 
     def set_backup_configure(self, data):
-        print '%s: redis set backup_configure' % time.strftime('%Y-%m-%d %H-%M-%S')
+        print '%s: ---- redis: set backup_configure' % time.strftime('%Y-%m-%d %H-%M-%S')
         backup_configure = json.dumps(data,ensure_ascii=False)
         self._redis.set('backup_configure', backup_configure)
         return backup_configure
@@ -104,9 +135,12 @@ class DBAPortalRedis(object):
         return backup_email_backup_report
 
     def set_backup_email_backup_report(self, data):
-        print '%s: redis set backup_email_backup_report' % time.strftime('%Y-%m-%d %H-%M-%S')
+        print '%s: ---- redis: set backup_email_backup_report' % time.strftime('%Y-%m-%d %H-%M-%S')
         backup_email_backup_report = json.dumps(data,ensure_ascii=False)
-        self._redis.set('backup_email_backup_report', backup_email_backup_report)
+        pipeline = self._redis.pipeline()
+        pipeline.set('backup_email_backup_report', backup_email_backup_report)
+        pipeline.expire('backup_email_backup_report', 3600*24)
+        pipeline.execute()
         return backup_email_backup_report
 
 
@@ -114,45 +148,19 @@ class DBAPortalRedis(object):
         server_all = json.loads(self._redis.get('server_all'))
         return server_all
 
-    def set_server_all(self, data):
-        print '%s: redis set server_all' % time.strftime('%Y-%m-%d %H-%M-%S')
-        server_all = json.dumps(data,ensure_ascii=False)
-        self._redis.set('server_all', server_all)
-        return server_all
-
     def get_server_available(self):
         server_available = json.loads(self._redis.get('server_available'))
-        return server_available
-
-    def set_server_available(self, data):
-        print '%s: redis set server_available' % time.strftime('%Y-%m-%d %H-%M-%S')
-        server_available = json.dumps(data,ensure_ascii=False)
-        self._redis.set('server_available', server_available)
         return server_available
 
     def get_server_total_count(self):
         server_total_count = json.loads(self._redis.get('server_total_count'))
         return server_total_count
 
-    def set_server_total_count(self, data):
-        print '%s: redis set server_total_count' % time.strftime('%Y-%m-%d %H-%M-%S')
-        server_total_count = json.dumps(data,ensure_ascii=False)
-        self._redis.set('server_total_count', server_total_count)
-        return server_total_count
-
-
     def get_instance_total_count(self):
         instance_total_count = json.loads(self._redis.get('instance_total_count'))
         return instance_total_count
 
-    def set_instance_total_count(self, data):
-        print '%s: redis set instance_total_count' % time.strftime('%Y-%m-%d %H-%M-%S')
-        instance_total_count = json.dumps(data,ensure_ascii=False)
-        self._redis.set('instance_total_count', instance_total_count)
-        return instance_total_count
-
-
 
 if __name__ == '__main__':
     test = DBAPortalRedis()
-    test.init_dba_portal_redis()
+    test.reset_dba_portal_redis()
