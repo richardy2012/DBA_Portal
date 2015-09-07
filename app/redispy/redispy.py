@@ -29,10 +29,18 @@ class DBAPortalRedis(object):
         '''
         print '%s: -- redis: reset backup data...' % time.strftime('%Y-%m-%d %H-%M-%S')        
         backup_list = BackupList()
+        # print '%s: add backup mha into redis...' % time.strftime('%Y-%m-%d %H-%M-%S')
         # backup_mha = backup_list.mha()
         # backup_mha = json.dumps(backup_mha,ensure_ascii=False)
         # self._redis.set('backup_mha', backup_mha)
         # time.sleep(3)
+
+        # print '%s: add backup mongo into redis...' % time.strftime('%Y-%m-%d %H-%M-%S')
+        # backup_mongo = backup_list.mongo()
+        # backup_mongo = json.dumps(backup_mongo,ensure_ascii=False)
+        # self._redis.set('backup_mongo', backup_mongo)
+        # time.sleep(3)
+
         # print '%s: add backup single-instance into redis...' % time.strftime('%Y-%m-%d %H-%M-%S')
         # backup_single_instance = backup_list.single_instance()
         # backup_single_instance = json.dumps(backup_single_instance,ensure_ascii=False)
@@ -109,6 +117,16 @@ class DBAPortalRedis(object):
         backup_mha = json.dumps(data,ensure_ascii=False)
         self._redis.set('backup_mha', backup_mha)
         return backup_mha
+
+    def get_backup_mongo(self):
+        backup_mongo = json.loads(self._redis.get('backup_mongo'))
+        return backup_mongo
+
+    def set_backup_mongo(self, data):
+        print '%s: ---- redis: set backup_mongo' % time.strftime('%Y-%m-%d %H-%M-%S')
+        backup_mongo = json.dumps(data,ensure_ascii=False)
+        self._redis.set('backup_mongo', backup_mongo)
+        return backup_mongo
     
     def get_backup_single_instance(self):
         backup_single_instance = json.loads(self._redis.get('backup_single_instance'))

@@ -1114,6 +1114,8 @@ def sort_cluster_by_backup_status(clusters):
                 success_count += 1
             else:
                 other_count += 1
+            if type(server['port']) is int:
+                server['status'] = str(server['status'])
 
         if success_count == 0 and other_count == 0:
             nonbackup[buss] = cluster
@@ -1228,15 +1230,19 @@ def backup_center():
     if not have_accessed():
         return redirect(url_for('login'))
     try:
+        backup_list = BackupList()
         dba_portal_redis = DBAPortalRedis()
+
         backup_mha = dba_portal_redis.get_backup_mha() if dba_portal_redis._redis.exists('backup_mha') else ''
         backup_single_instance = dba_portal_redis.get_backup_single_instance() if dba_portal_redis._redis.exists('backup_single_instance') else ''
         backup_configure = dba_portal_redis.get_backup_configure() if dba_portal_redis._redis.exists('backup_configure') else ''
+        backup_mongo = dba_portal_redis.get_backup_mongo() if dba_portal_redis._redis.exists('backup_mongo') else ''
 
-        backup_list = BackupList()
         if not backup_mha:
             backup_mha = backup_list.mha()
             #dba_portal_redis.set_backup_mha(backup_mha)
+        if not backup_mongo:
+            backup_mongo = backup_list.mongo()
         if not backup_single_instance:
             backup_single_instance = backup_list.single_instance()
             #dba_portal_redis.set_backup_single_instance(backup_single_instance)
@@ -1245,13 +1251,15 @@ def backup_center():
             #dba_portal_redis.set_backup_configure(backup_configure)
 
         mha = sort_cluster_by_backup_status(backup_mha['mha'])
-        data = {'mha':mha}
+        mongo = sort_cluster_by_backup_status(backup_mongo['mongo'])
+        data = {'mha':mha, 'mongo':mongo}
         data['page_name']="备份中心"
         data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
         data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
         data['nonbackup']="尚未备份"
         data['warningbackup']="警告备份"
         data['goodbackup']="成功备份"
+#        return render_template('blank.html')
         return render_template('backup_center.html', data=data, backup_configure=backup_configure, backup_single_instance=backup_single_instance)
     except Exception,e:
         app.logger.error(str(e))

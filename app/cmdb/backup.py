@@ -5,6 +5,10 @@ class BackupList(CmdbApiBase):
         result = self.__call_interface__('BACKUP','backup_info/Mysql_Cluster',json_obj=None)
         return result
 
+    def mongo(self):
+        result = self.__call_interface__('BACKUP','backup_info/Mongo_Cluster',json_obj=None)
+        return result
+
     def single_instance(self):
         result = self.__call_interface__('BACKUP','backup_info/Single',json_obj=None)
         return result

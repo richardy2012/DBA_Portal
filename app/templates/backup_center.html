@@ -7,7 +7,7 @@
 
 <script>
   function show_this_server_type(server_type) {
-  var server_types = new Array("MySQL_cluster", "MySQL");
+  var server_types = new Array("MySQL_cluster", "MySQL", "Mongo_cluster");
   for (var i=0; i< server_types.length; i++) {
 		   var server_div = document.getElementById('div_backup_' + server_types[i]);
 		   if (server_type == server_types[i]) {
@@ -35,16 +35,16 @@
       <ul class="nav nav-tabs" id="tab_backup">
         <li onclick="show_this_server_type('MySQL_cluster')" class="active"><a href="#">MySQL集群</a></li>
 	<li onclick="show_this_server_type('MySQL')"><a href="#">MySQL单实例</a></li>
-	<!-- <li onclick="show_this_server_type('MongoDB')"><a href="#">MongoDB实例</a></li> -->
+	<li onclick="show_this_server_type('Mongo_cluster')"><a href="#">MongoDB集群</a></li>
       </ul>
     </div>
 
-    <!-- Tab of MySQL_cluster -->
-    {% for mmm_type in ['mha']%}
-    {% if mmm_type == 'mha' %}
+    <!-- Tab of MySQL_cluster and Mongo_cluster -->
+    {% for backup_cluster_type in ['mha', 'mongo']%}
+    {% if backup_cluster_type == 'mha' %}
     <div id="div_backup_MySQL_cluster">
-      {% else %}
-      <div id="div_backup_MySQL_cluster" style="display:none">
+      {% elif backup_cluster_type == 'mongo' %}
+      <div id="div_backup_Mongo_cluster" style="display:none">
 	{% endif %}
         {% for backup_type in ['nonbackup','warningbackup','goodbackup'] %}
 	{% if backup_type == 'nonbackup' %}
@@ -62,8 +62,8 @@
             <tr><th>集群名字</th><th>IP</th><th>版本</th><th>角色</th><th>是否备份</th><th>备份状态</th><th>添加/删除备份</th></tr>
           </thead>
           <tbody>
-	    {%  if data[mmm_type]  and data[mmm_type][backup_type]%}
-	    {%  set cluster = data[mmm_type][backup_type] %}
+	    {%  if data[backup_cluster_type]  and data[backup_cluster_type][backup_type]%}
+	    {%  set cluster = data[backup_cluster_type][backup_type] %}
 	    {% for cluster_name in cluster %}
             {% if loop.index%2 ==0 %}
             {% set color='' %}
@@ -91,7 +91,11 @@
                 </a>
 		{% endif %}
 	      </td>
-	      <td>{% if cluster[cluster_name][ip]['version'] %}{{ cluster[cluster_name][ip]['version']}}{% endif %}</td>
+	      <td>
+		{% if cluster[cluster_name][ip]['version'] %}
+		{{ cluster[cluster_name][ip]['version']}}
+		{% endif %}
+	      </td>
 	      <td>
                 {% if cluster[cluster_name][ip]['role'] %}
                 {{ cluster[cluster_name][ip]['role'] }}
@@ -333,7 +337,7 @@
 				  modal.find('.modal-body #last_bak_time').val(last_bak_time)
 				  modal.find('.modal-body #end_bak_time').val(end_bak_time)
 				  modal.find('.modal-body #keep_bak_time').val(keep_bak_time)
-				  modal.find('.modal-body #time').val('')
+				  modal.find('.modal-body #time').val(next_bak_time)
 				  $('#submit').attr("disabled", "disabled");
 				  $('#warning')[0].innerHTML = ''
 				  })
