@@ -65,7 +65,9 @@
         <a type="button" {{disabled}} class="btn btn-warning" id="button_install_mysql">部署MySQL</a> &nbsp;&nbsp; 
         <a type="button" {{disabled}} class="btn btn-warning" id="button_install_mongodb">部署Mongodb</a> &nbsp;&nbsp; 
         <a type="button" {{disabled}} class="btn btn-warning" id="button_install_memcache">部署Memcache</a> &nbsp;&nbsp; 
-	<a type="button" {{disabled}} class="btn btn-danger" href="{{ url_for('flush_cache') }}?keys=key1:server_all&page=server_list">刷新缓存</a>
+	<div hidden="hidden">
+	  <a type="button" {{disabled}} class="btn btn-danger" href="{{ url_for('flush_cache') }}?keys=key1:server_all&page=server_list">刷新缓存</a>
+	</div>
 
 	<div hidden="hidden">
 	  | &nbsp;&nbsp;
