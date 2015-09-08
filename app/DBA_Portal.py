@@ -53,7 +53,7 @@ def have_accessed():
         msg = "%s: %s" % (type(e).__name__, e.message)
         app.logger.error(str(e))
         flash(msg, 'danger')
-        
+        return render_template('blank.html')
 
 def add_authority_parameters(query_condition=None):
     """
@@ -76,6 +76,7 @@ def add_authority_parameters(query_condition=None):
         msg = "%s: %s" % (type(e).__name__, e.message)
         app.logger.error(str(e))
         flash(msg, 'danger')
+        return render_template('blank.html')
 
 def get_parameters_from_url(request_url=request,query_key=None):
     """
@@ -244,10 +245,8 @@ def fill_install_db_form(server_form=None, db_type=None, instance=None, comment=
     owner_list = server_list.list_supported_dba()
     biz_list = server_list.list_supported_biz()
     if comment.get('bu','') != '':
-        product = get_product(comment['bu'])
-        if type(product) is str:
-            biz_li = json.loads(product) 
-            biz_list = zip(biz_li,biz_li)
+        biz_li = get_product(comment['bu'])
+        biz_list = zip(biz_li,biz_li)
 
     server_form.dba_owner.choices = owner_list
     server_form.buss.choices = biz_list
@@ -689,8 +688,8 @@ def applyresult():
 
 @app.route("/install/<db_type>")
 def install_db(db_type=None):
-#    if not have_accessed():
-#        return redirect(url_for('login'))
+    if not have_accessed():
+        return redirect(url_for('login'))
     if not db_type:
         return redirect(url_for('serverlist'))
     try:
@@ -828,15 +827,20 @@ def get_product(bu):
         return redirect(url_for('login'))
 
     try:
-        result = []
-        url = "http://api.cmdb.dp/api/v0.1/bu/"+bu+"/products"
-        rep = requests.get(url).json()
-        for re in rep['products']:
-            result +=[re['product_name']]
-        return json.dumps(result)
+        dba_portal_redis = DBAPortalRedis()
+        key = 'product_bu_' + str(hash(bu))
+        product_bu = dba_portal_redis.get_product_bu(key) if dba_portal_redis._redis.exists(key) else ''
+        if not product_bu:
+            product_bu = []
+            url = "http://api.cmdb.dp/api/v0.1/bu/"+bu+"/products"
+            rep = requests.get(url).json()
+            for re in rep['products']:
+                product_bu += [re['product_name']]
+            dba_portal_redis.set_json_with_expire(key, product_bu, 3600*24)
+        return product_bu
     except Exception,e:
         app.logger.error(str(e))
-        return json.dumps([])
+        return ''
 
 ###################################
 #instance function part
