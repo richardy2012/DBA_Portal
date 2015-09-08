@@ -7,7 +7,7 @@ from flask import Flask,render_template,request,url_for,redirect,flash,current_a
 from datetime import timedelta
 
 from cmdb.server import ServerList
-from cmdb.instance import InstList
+from cmdb.instance import InstanceList
 from cmdb.server_info_form import ServerInfoForm, ServerInitForm, InstanceInfoForm, StandbyServerInfoForm, ApplyServerForm, InstallDbForm, BackupForm
 from config import AppConfig
 from cmdb.cmdb_api_base import CmdbApiCallException
@@ -215,8 +215,8 @@ def check_date(date):
 # form function part
 ###################################
 def fill_init_server_form(server_form=None, mirror=''):
-    host_info = ServerList()
-    mirror_list = host_info.list_supported_mirror()
+    server_list = ServerList()
+    mirror_list = server_list.list_supported_mirror()
     mirror_list = zip(mirror_list, mirror_list)
     server_form.mirror.choices = mirror_list
 
@@ -225,11 +225,11 @@ def fill_init_server_form(server_form=None, mirror=''):
     return server_form
 
 def fill_apply_server_form(server_form=None, ip=''):
-    host_info = ServerList()
+    server_list = ServerList()
 
-    bu_list = host_info.list_supported_bu()
-    type_list = host_info.list_supported_type()
-    dba_owner_list = host_info.list_supported_dba()
+    bu_list = server_list.list_supported_bu()
+    type_list = server_list.list_supported_type()
+    dba_owner_list = server_list.list_supported_dba()
     server_form.bu.choices = bu_list
     server_form.type.choices = zip(type_list,type_list)
     server_form.dba_owner.choices = dba_owner_list
@@ -240,48 +240,29 @@ def fill_apply_server_form(server_form=None, ip=''):
     return server_form
 
 def fill_install_db_form(server_form=None, db_type=None, instance=None, comment=None):
-    host_info = ServerList()
-    owner_list = host_info.list_supported_dba()
-    if comment.get('bu','') == '':
-        biz_list = host_info.list_supported_biz()
-    else:
-        biz_li = json.loads(get_product(comment['bu']))
-        biz_list = zip(biz_li,biz_li)
+    server_list = ServerList()
+    owner_list = server_list.list_supported_dba()
+    biz_list = server_list.list_supported_biz()
+    if comment.get('bu','') != '':
+        product = get_product(comment['bu'])
+        if type(product) is str:
+            biz_li = json.loads(product) 
+            biz_list = zip(biz_li,biz_li)
+
     server_form.dba_owner.choices = owner_list
     server_form.buss.choices = biz_list
     server_form.backup.data = 'y'
     server_form.zabbix.data = 'y'
-    version_list = None
-    ports = None
-    if db_type == 'mysql':
-        version_list = host_info.list_supported_mysql_version()
-        ports = [3306,3307,3308,3309,3310,3311,3312,3313]
-    elif db_type == 'mongodb':
-        version_list = host_info.list_supported_mongodb_version()
-        ports = [27017,27018,27019,27117,27118,27119]
-    elif db_type == 'memcache':
-        version_list = host_info.list_supported_memcache_version()
-        ports = []
-        for port in range(11211,11221):
-            ports.append(port)
-
-    for i in instance:
-	if i["port"] in ports and i['status'] != u'未初始化':
-	    ports.remove(i["port"])
-    port_list = list()
-    port_list.append('')
-    for port in ports:
-	port_list.append(port)
-    server_form.version.choices = version_list
-    server_form.port.choices = zip(port_list,port_list)
+    server_form.version.choices = server_list.list_supported_db_version(db_type)
+    server_form.port.choices = server_list.list_supported_db_port(db_type, instance)
     return server_form
 
 def fill_server_info_form(server_form=None, idc='', logic_cpu_count='', ram_size=''):
-    host_info = ServerList()
+    server_list = ServerList()
 
-    idc_list = host_info.list_supported_idc()
-    cpu_list = host_info.list_supported_cpu()
-    ram_size_list = host_info.list_supported_ram_size()
+    idc_list = server_list.list_supported_idc()
+    cpu_list = server_list.list_supported_cpu()
+    ram_size_list = server_list.list_supported_ram_size()
 
     server_form.idc.choices = idc_list
     server_form.logic_cpu_count.choices = cpu_list
@@ -298,11 +279,11 @@ def fill_server_info_form(server_form=None, idc='', logic_cpu_count='', ram_size
     return server_form
 
 def fill_standby_server_info_form(server_form=None, idc='', cpu='', ram_size=''):
-    host_info = ServerList()
+    server_list = ServerList()
 
-    idc_list = host_info.list_supported_idc()
-    cpu_list = host_info.list_supported_cpu()
-    ram_size_list = host_info.list_supported_ram_size()
+    idc_list = server_list.list_supported_idc()
+    cpu_list = server_list.list_supported_cpu()
+    ram_size_list = server_list.list_supported_ram_size()
 
     server_form.idc.choices = idc_list
     server_form.cpu.choices = cpu_list
@@ -319,12 +300,12 @@ def fill_standby_server_info_form(server_form=None, idc='', cpu='', ram_size='')
     return server_form
     
 def fill_inst_info_form(server_form=None, type='', status='', dba_owner='', cluster_name=''):
-    host_info = InstList()
+    instance_list = InstanceList()
 
-    type_list = host_info.list_supported_type()
-    status_list = host_info.list_supported_status()
-    dba_owner_list = host_info.list_supported_dba()
-    cluster_name_list = host_info.list_supported_cluster()
+    type_list = instance_list.list_supported_type()
+    status_list = instance_list.list_supported_status()
+    dba_owner_list = instance_list.list_supported_dba()
+    cluster_name_list = instance_list.list_supported_cluster()
     #cluster_name_list = [('', ''), (u'alone', u'alone')]
     server_form.type.choices = type_list
     server_form.status.choices = status_list
@@ -372,17 +353,17 @@ def operate_server(operate_type=None,server_id=None):
         if not (server_id and operate_type):
             flash('请选择服务器,请选择操作类型', 'danger')
             return redirect(url_for('server_list'))
-        host_info = ServerList()
+        server_list = ServerList()
         query_result = None
 
         if operate_type == 'offline':
-            query_result = host_info.offline_by_id(server_id)
+            query_result = server_list.offline_by_id(server_id)
             flash('服务器异步下线成功...请勿再次下线相同机器！', 'success')
         elif operate_type == 'online':
-            query_result = host_info.online_by_id(server_id)
+            query_result = server_list.online_by_id(server_id)
             flash('服务器异步上线成功...请勿再次上线相同机器！', 'success')
         elif operate_type == 'delete':
-            query_result = host_info.delete_by_id(server_id)
+            query_result = server_list.delete_by_id(server_id)
             flash('服务器异步删除成功...请勿再次删除相同机器！', 'success')
         return redirect(url_for('server_list'))
     except CmdbApiCallException, e:
@@ -401,14 +382,14 @@ def server_info(server_id=None):
  
     try:
         data = dict({'page_data': dict()})
-        host_info = ServerList()
+        server_list = ServerList()
         data['page_data']['server_id'] = server_id
 
         single_server_info = dict()
-        query_result = host_info.machine_info_by_id(server_id)
+        query_result = server_list.machine_info_by_id(server_id)
         if not query_result:
             machine_info = dict()
-            query_result = host_info.info_by_id(server_id)
+            query_result = server_list.info_by_id(server_id)
             
         if len(query_result) > 0:
             machine_info = query_result[0]
@@ -437,14 +418,14 @@ def init_system(server_id=None):
         if request.method == 'POST':
             supported_query_key = ['server_id', 'server_ip', 'mirror', 'comment']
             query_condition = get_parameters_from_url(request,supported_query_key)
-            host_info = ServerList()
-            result = host_info.init_system_with_mirror(query_condition)
+            server_list = ServerList()
+            result = server_list.init_system_with_mirror(query_condition)
             flash('System initial request sent', 'success')
         else:
             if not server_id or server_id == 0:
                 page_data = ''
 
-        page_data = host_info.info_by_id(server_id)[0]
+        page_data = server_list.info_by_id(server_id)[0]
         server_form = ServerInitForm()
         if request.form.get('mirror', False):
             server_form = fill_init_server_form(server_form, request.form.get('mirror', ''))
@@ -472,16 +453,16 @@ def server_info_edit(server_id=None):
  
     try:
         data = dict()
-        host_info = ServerList()
+        server_list = ServerList()
         if request.method == 'POST':
             page_data = request.form
-            host_info.save_server_info(page_data)
+            server_list.save_server_info(page_data)
             flash('Edit Server Information Success', 'success')
         else:
             if not server_id or server_id == 0:
                 page_data = ''
             else:
-                page_data = host_info.info_by_id(server_id)[0]
+                page_data = server_list.info_by_id(server_id)[0]
 
         server_form = ServerInfoForm()
         supported_select_key = ['owner', 'mirror', 'server_status', 'env']
@@ -572,7 +553,7 @@ def server_list():
         #filtered_servers = all_servers.list_all(data=query_condition)
         filtered_servers = server_all
 
-        instance_list = InstList()
+        instance_list = InstanceList()
         instance_all = dba_portal_redis.get_instance_all() if dba_portal_redis._redis.exists('instance_all') else ''
         if not instance_all:
             instance_all = instance_list.list_all()
@@ -708,8 +689,8 @@ def applyresult():
 
 @app.route("/install/<db_type>")
 def install_db(db_type=None):
-    if not have_accessed():
-        return redirect(url_for('login'))
+#    if not have_accessed():
+#        return redirect(url_for('login'))
     if not db_type:
         return redirect(url_for('serverlist'))
     try:
@@ -721,7 +702,7 @@ def install_db(db_type=None):
             return server_list()
 
         server_list = ServerList()
-        instance_list = InstList()
+        instance_list = InstanceList()
         page_data = server_list.list_all(data={"private_ip":request_value})
         page_data[0]['serverid'] = request_value
         instance_data = instance_list.list_all(data=dict(server_ip=request_value))
@@ -735,7 +716,6 @@ def install_db(db_type=None):
         comment = parse_comment_string(comment)
         flash(json.dumps(comment))
         filter_form = fill_install_db_form(server_form=filter_form,db_type=db_type,instance=instance_data,comment=comment)
-
         message_list = ({'from': 'admin', 'time': '2013-01-01', 'content': 'This is a test message'},)
         task_list = ({'name': 'task 1', 'progress': 10},)
         data['message_list'] = message_list
@@ -749,7 +729,7 @@ def install_db(db_type=None):
             raise Exception('您选择的服务器信息有误')
         data['page_data'] = page_data
         data['instance_data'] = instance_data
-        data['form'] = filter_form     
+        data['form'] = filter_form
         if db_type == 'mysql':
             return render_template('installmysql.html', data=data)
         elif db_type == 'mongodb':
@@ -778,7 +758,7 @@ def install_result(db_type=None):
         query_condition = add_authority_parameters(query_condition)
 
         all_servers = ServerList()
-        instance = InstList()
+        instance = InstanceList()
         result = instance.add_instance(query_condition)
         data['result'] = 'success'
         data['info'] = '已进入安装池！安装信息：'+ json.dumps(query_condition,ensure_ascii=False)
@@ -800,12 +780,12 @@ def add_server():
     if not have_accessed():
         return redirect(url_for('login'))
     try:
-        host_info = ServerList()
-        env = host_info.list_supported_env()
-        mirror = host_info.list_supported_mirror()
-        use_status = host_info.list_supported_use_status()
-        owner = host_info.list_supported_dba()
-        status = host_info.list_supported_status()
+        server_list = ServerList()
+        env = server_list.list_supported_env()
+        mirror = server_list.list_supported_mirror()
+        use_status = server_list.list_supported_use_status()
+        owner = server_list.list_supported_dba()
+        status = server_list.list_supported_status()
 
         server_form = ServerInfoForm()
         server_form.env.choices = env
@@ -868,7 +848,7 @@ def instance_list():
     try:
         supported_query_key = ['cluster_name', 'dba_owner', 'type', 'status']
         query_condition = get_parameters_from_url(request,supported_query_key)
-        all_insts = InstList()
+        all_insts = InstanceList()
         filter_form = InstanceInfoForm()
         filter_form = fill_inst_info_form(server_form=filter_form, **query_condition)
         query_condition['cluster'] = True
@@ -918,8 +898,8 @@ def instance_info(id=None):
         return redirect(url_for('login'))
     try:
         data = dict({'page_data': dict()})
-        host_info = ServerList()
-        instance = InstList()
+        server_list = ServerList()
+        instance = InstanceList()
 
         single_instance_info = dict()
         query_result = instance.info_by_id(id)
@@ -928,13 +908,13 @@ def instance_info(id=None):
 
         server_id = single_instance_info['server_id']
         single_server_info = dict()
-        query_result = host_info.info_by_id(server_id)
+        query_result = server_list.info_by_id(server_id)
         single_server_info = query_result[0]
         data['page_data']['server_info'] = single_server_info
         data['page_data']['server_info']['server_id'] = server_id
 
         machine_info = dict()
-        query_result = host_info.machine_info_by_id(server_id)
+        query_result = server_list.machine_info_by_id(server_id)
         machine_info = query_result[0]
         data['page_data']['machine_info'] = machine_info
 
@@ -956,10 +936,10 @@ def add_instance():
     if not have_accessed():
         return redirect(url_for('login'))
     try:
-        host_info = InstList()
-        type_list = host_info.list_supported_type()
-        status_list = host_info.list_supported_status()
-        dba_owner_list = host_info.list_supported_dba()
+        instance_list = InstanceList()
+        type_list = instance_list.list_supported_type()
+        status_list = instance_list.list_supported_status()
+        dba_owner_list = instance_list.list_supported_dba()
 
         server_form = InstanceInfoForm()
         server_form.type.choices = type_list
@@ -969,7 +949,7 @@ def add_instance():
         data = dict({'page_data': {}, 'form_data': {}})
         if request.method == 'POST':
             server_post = request.form
-            server_info = InstList()
+            server_info = InstanceList()
             result = server_info.add_instance(server_post)
             page_data = dict()
             page_data['add_result'] = dict()
@@ -978,8 +958,8 @@ def add_instance():
             data['form_data'] = server_post
         elif request.method == 'GET':
             server_id = request.args.get('server_id')
-            host_info = ServerList()
-            server_ip = host_info.get_ip_by_id(server_id)
+            server_list = ServerList()
+            server_ip = server_list.get_ip_by_id(server_id)
             data['form_data']['server_id'] = server_id
             data['form_data']['server_ip'] = server_ip
             page_data = ''
@@ -1016,7 +996,7 @@ def operate_instance(operate_type=None):
         query_condition = get_parameters_from_url(request,supported_query_key)
         query_condition = add_authority_parameters(query_condition)
 
-        instance_list = InstList()
+        instance_list = InstanceList()
         if operate_type == 'online':
             instance_list.online_instance(data=query_condition)
         elif operate_type == 'pre_offline':
@@ -1179,8 +1159,8 @@ def set_backup_config():
         if request.method == 'POST':
             supported_query_key = ['server_id', 'server_ip', 'mirror', 'comment']
             query_condition = get_parameters_from_url(request,supported_query_key)
-            host_info = ServerList()
-            result = host_info.init_system_with_mirror(query_condition)
+            server_list = ServerList()
+            result = server_list.init_system_with_mirror(query_condition)
             flash('System initial request sent', 'success')
         else:
             if not server_id or server_id == 0:
@@ -1418,7 +1398,7 @@ def add_backup():
             flash(result,'danger')
             return redirect(url_for('backup'))
         else:
-            instance = InstList()
+            instance = InstanceList()
             query_condition['type'] = 'MySQL'
             query_condition['server_ip'] = query_condition.pop('ip')
             insts = instance.list_all(query_condition)
@@ -1733,7 +1713,7 @@ def my_workflow():
         user = dict()
         user['realname'] = flask.session['CAS_NAME']
         user['userid'] = flask.session['CAS_NUMBER']
-        instances = InstList()
+        instances = InstanceList()
         instances_status = instances.my_instance_workflow(user)
         data = dict()
         data['page_data'] = instances_status
@@ -1774,7 +1754,7 @@ def dashboard():
         instance_total_count = dba_portal_redis.get_instance_total_count() if dba_portal_redis._redis.exists('instance_total_count') else ''
 
         server_list = ServerList()
-        instance_list = InstList()
+        instance_list = InstanceList()
         if not server_total_count:
             server_total_count = server_list.get_total_count()
             dba_portal_redis.set_json_with_expire('server_total_count', server_total_count, dba_portal_redis._expire_server_total_count)

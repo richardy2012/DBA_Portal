@@ -10,7 +10,7 @@ sys.path.append("..")
 from config import AppConfig
 
 from cmdb.server import ServerList
-from cmdb.instance import InstList
+from cmdb.instance import InstanceList
 from cmdb.backup import BackupList
 
 class DBAPortalRedis(object):
@@ -72,7 +72,7 @@ class DBAPortalRedis(object):
         time.sleep(3)
 
         print '%s: -- redis: reset instance data...' % time.strftime('%Y-%m-%d %H-%M-%S')        
-        instance_list = InstList()
+        instance_list = InstanceList()
         instance_all = instance_list.list_all()
         self.set_json_with_expire('instance_all', instance_all, self._expire_instance_all)
         time.sleep(3)

@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-__author__ = 'cenalulu'
+__author__ = 'cenalulu, dfcao'
 import urllib2
 import urllib
 import json,requests
@@ -225,41 +225,47 @@ class ServerList(CmdbApiBase):
         else:
             return False
 
-    def list_supported_mysql_version(self):
-        #result = self.__call_interface__('CMDB', 'getdatacenter')
-        result = ["Percona-5.1.58-OS5-x86_64","Percona-5.1.58-OS6-x86_64","Percona-5.6.19-OS6-x86_64","Percona-5.6.24-OS6-x86_64"]
-        env_list = list()
-        env_list.append('')
-        if result:
-            for env in result:
-                env_list.append(env)
-            return zip(env_list,env_list)
-        else:
+    def list_supported_db_version(self, db_type):
+        if db_type not in ("mysql", "mongodb", "memcache"):
+            print "List db version error: please pass a correct db_type."
             return False
 
-    def list_supported_mongodb_version(self):
-        #result = self.__call_interface__('CMDB', 'getdatacenter')
-        result = ["2.0.7","2.0.9","2.2.4","2.4.4","2.6.9","3.0.1","3.0.4"]
-        env_list = list()
-        env_list.append('')
-        if result:
-            for env in result:
-                env_list.append(env)
-            return zip(env_list,env_list)
-        else:
+        versions = None
+        if db_type == "mysql":
+            versions = ["Percona-5.1.58-OS5-x86_64","Percona-5.1.58-OS6-x86_64","Percona-5.6.19-OS6-x86_64","Percona-5.6.24-OS6-x86_64"]
+        elif db_type == "mongodb":
+            versions = ["2.0.7","2.0.9","2.2.4","2.4.4","2.6.9","3.0.1","3.0.4"]
+        elif db_type == "memcache":
+            versions = ["Memcached-1.4.15-OS6-x86_64","Memcached-1.4.15-OS5-x86_64"]
+        
+        version_list = list()
+        version_list.append('')
+        for version in versions:
+            version_list.append(version)
+        return zip(version_list, version_list)
+
+    def list_supported_db_port(self, db_type, instance):
+        if db_type not in ("mysql", "mongodb", "memcache"):
+            print "List db port error: please pass a correct db_type."
             return False
 
-    def list_supported_memcache_version(self):
-        #result = self.__call_interface__('CMDB', 'getdatacenter')
-        result = ["Memcached-1.4.15-OS6-x86_64","Memcached-1.4.15-OS5-x86_64"]
-        env_list = list()
-        env_list.append('')
-        if result:
-            for env in result:
-                env_list.append(env)
-            return zip(env_list,env_list)
-        else:
-            return False
+        ports = None
+        if db_type == "mysql":
+            ports = [3306,3307,3308,3309,3310,3311,3312,3313]
+        elif db_type == "mongodb":
+            ports = [27017,27018,27019,27117,27118,27119]
+        elif db_type == "memcache":
+            ports = [11211,11221]
+        
+        for i in instance:
+            if i["port"] in ports and i['status'] != u'未初始化':
+                ports.remove(i["port"])
+        port_list = list()
+        port_list.append('')
+        for port in ports:
+            port_list.append(port)
+        return zip(port_list, port_list)
+
 
     def list_supported_biz(self):
         #result = self.__call_interface__('CMDB', 'getdatacenter')

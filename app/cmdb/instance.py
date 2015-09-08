@@ -2,7 +2,7 @@
 from cmdb_api_base import CmdbApiBase
 
 
-class InstList(CmdbApiBase):
+class InstanceList(CmdbApiBase):
 
     def list_all(self, data=None):
         result = self.__call_interface__('CMDB', 'getinstanceinfo', json_obj=data)
