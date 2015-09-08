@@ -21,6 +21,7 @@ class DBAPortalRedis(object):
         self._expire_server_all = 120
         self._expire_server_available = 120
         self._expire_server_total_count = 120
+        self._expire_instance_all = 120
         self._expire_instance_total_count = 120
 
     def reset_dba_portal_redis(self):
@@ -72,6 +73,9 @@ class DBAPortalRedis(object):
 
         print '%s: -- redis: reset instance data...' % time.strftime('%Y-%m-%d %H-%M-%S')        
         instance_list = InstList()
+        instance_all = instance_list.list_all()
+        self.set_json_with_expire('instance_all', instance_all, self._expire_instance_all)
+        time.sleep(3)
         instance_total_count = instance_list.get_total_count()
         self.set_json_with_expire('instance_total_count', instance_total_count, self._expire_instance_total_count)
         time.sleep(3)
@@ -177,6 +181,10 @@ class DBAPortalRedis(object):
     def get_instance_total_count(self):
         instance_total_count = json.loads(self._redis.get('instance_total_count'))
         return instance_total_count
+
+    def get_instance_all(self):
+        instance_all = json.loads(self._redis.get('instance_all'))
+        return instance_all
 
 
 if __name__ == '__main__':

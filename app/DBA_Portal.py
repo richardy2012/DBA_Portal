@@ -560,9 +560,9 @@ def server_list():
         query_condition = get_parameters_from_url(request,supported_query_key)
         
         dba_portal_redis = DBAPortalRedis()
-        server_all = dba_portal_redis.get_server_all() if dba_portal_redis._redis.exists('server_all') else ''
 
         server_list = ServerList()
+        server_all = dba_portal_redis.get_server_all() if dba_portal_redis._redis.exists('server_all') else ''
         if not server_all:
             server_all = server_list.list_all()
             dba_portal_redis.set_json_with_expire('server_all', server_all, dba_portal_redis._expire_server_all)
@@ -571,8 +571,14 @@ def server_list():
         #all_servers = ServerList()
         #filtered_servers = all_servers.list_all(data=query_condition)
         filtered_servers = server_all
-        inst_list = InstList()
-        insts = [inst['server_ip'] for inst in inst_list.list_all()]
+
+        instance_list = InstList()
+        instance_all = dba_portal_redis.get_instance_all() if dba_portal_redis._redis.exists('instance_all') else ''
+        if not instance_all:
+            instance_all = instance_list.list_all()
+            dba_portal_redis.set_json_with_expire('instance_all', instance_all, dba_portal_redis._expire_instance_all)
+
+        instances = [instance['server_ip'] for instance in instance_all]
 
         page_data={}
         have_instance = []
@@ -591,7 +597,7 @@ def server_list():
                 server['recently_apply'] = 0
                 server['offline_warning'] = "确认下线？"
                 server['force'] = False
-            if server['private_ip'] in insts:
+            if server['private_ip'] in instances:
                 server['in'] = 0
                 have_instance.append(server)
             else:
@@ -709,15 +715,16 @@ def install_db(db_type=None):
     try:
         data = dict()
         query_condition = dict()
-        all_servers = ServerList()
-        all_insts = InstList()
         request_value = request.args.get('serverid', False)
         if request_value=='undefined':
             flash("您还没有选择服务器",'danger')
             return server_list()
-        page_data = all_servers.list_all(data={"private_ip":request_value})
+
+        server_list = ServerList()
+        instance_list = InstList()
+        page_data = server_list.list_all(data={"private_ip":request_value})
         page_data[0]['serverid'] = request_value
-        instance_data = all_insts.list_all(data=dict(server_ip=request_value))
+        instance_data = instance_list.list_all(data=dict(server_ip=request_value))
         if len(page_data) < 1:
             flash(json.dumps(page_data),'danger')
             return render_template('blank.html')
