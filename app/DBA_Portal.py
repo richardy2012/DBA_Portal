@@ -19,6 +19,7 @@ from cas_urls import create_cas_logout_url
 from cas_urls import create_cas_validate_url
 
 from backup.backup import FileBackup
+from monitor.monitor import Monitor
 
 from redispy.redispy import DBAPortalRedis
 
@@ -1214,7 +1215,7 @@ def backup_config(ip=None, port=None):
         return render_template('blank.html')
 
 
-@app.route("/backup_history, methods=['GET', 'POST']")
+@app.route("/backup_history", methods=['GET', 'POST'])
 def backup_history():
     """
     Description: get backukup history
@@ -1229,6 +1230,8 @@ def backup_history():
         supported_query_key = ['buss','db_type','ip','port']
         query_condition = dict()
         query_condition = get_parameters_from_url(request,supported_query_key)
+        print '#--##############################'
+        print query_condition
         query_condition = add_authority_parameters(query_condition)
         if not (query_condition['db_type'] and (query_condition['buss'] or
                 (query_condition['ip'] and query_condition['port']))):
@@ -1541,17 +1544,27 @@ def slowlog():
         flash(msg, 'danger')
         return render_template('blank.html')
 
-@app.route("/querymonitor")
+@app.route("/query_monitor")
 def query_monitor():
     if not have_accessed():
         return redirect(url_for('login'))
     try:
-        data = dict({'page_name': 'Query Monitor'})
-        return render_template('blank.html', data=data)
-    except Exception, e:
-        msg = "%s: %s" % (type(e).__name__, e.message)
+        query_condition = {'product':['db-mysql-10.1.125.14-3306','db-mysql-10.1.125.15-3306','db-mysql-10.1.125.16-3306','db-mysql-10.1.125.18-3306','db-mysql-10.1.125.19-3306'], 'monitor_type':'questions'}
+        #query_condition = {'product':['db-mysql-10.1.125.14-3306'], 'monitor_type':'questions'}
+        monitor_list = Monitor()
+        print '#------------------#'
+        hcs = monitor_list.monitor_subclass(query_condition)
+        print hcs
+        hc_configs = json.dumps(hcs)
+        data = {'page_data': hcs}
+        today = time.strftime('%Y-%m-%d',time.localtime(time.time()))
+        data['page_name'] = "查询监控 " + today
+        data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
+        data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
+        return render_template('query_monitor.html', data=data, hc_configs=hc_configs)
+    except Exception,e:
         app.logger.error(str(e))
-        flash(msg, 'danger')
+        flash(e,'danger')
         return render_template('blank.html')
 
 @app.route("/flush_cache",methods=['POST','GET'])

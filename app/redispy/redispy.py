@@ -152,6 +152,16 @@ class DBAPortalRedis(object):
         self._redis.set('backup_configure', backup_configure)
         return backup_configure
 
+    def get_backup_history_bu(self):
+        backup_history_bu = json.loads(self._redis.get('backup_history_bu'))
+        return backup_history_bu
+
+    def set_backup_history_bu(self, data):
+        print '%s: ---- redis: set backup_history_bu' % time.strftime('%Y-%m-%d %H-%M-%S')
+        backup_history_bu = json.dumps(data,ensure_ascii=False)
+        self._redis.set('backup_history_bu', backup_history_bu)
+        return backup_history_bu
+
     def get_backup_email_backup_report(self):
         backup_email_backup_report = json.loads(self._redis.get('backup_email_backup_report'))
         return backup_email_backup_report

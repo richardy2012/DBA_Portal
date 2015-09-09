@@ -73,8 +73,11 @@
 	    {% for ip in cluster[cluster_name] %}
 	    <tr>
 	      {% if loop.index == 1 %}
-	      <td style="background: {{ color }}" rowspan={{ cluster[cluster_name]|length() }} >{{ cluster_name }}</td>
-	      {% endif %}
+	      <td style="background: {{ color }}" rowspan={{ cluster[cluster_name]|length() }} >
+		<!-- <a data-toggle="modal" data-target="#modal_history_bu" data-buss="{{ cluster_name }}" data-db_type="mysql" class="btn btn-info btn-xs"/> -->
+		{{ cluster_name }}
+	      </td>
+	      {% endif %}	      
 	      <td>
 		{% if ip %}
 		
@@ -214,10 +217,23 @@
 	  <div class="modal-footer">
             <input type="hidden" name="submit" id="submit" value="submit">
 	    <br/>
+	    <a type="button" class="btn btn-default" data-dismiss="modal">取消</a>
 	    <button type="submit" class="btn btn-success">提交</button>
-	    <a  type="button" class="btn btn-default" data-dismiss="modal">取消</a>
 	  </div>
 	</form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- backup_history Modal-->
+<div class="modal fade" id="modal_history_bu" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content col-lg-16">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="exampleModalLabel">备份历史</h4>
       </div>
     </div>
   </div>
@@ -286,6 +302,22 @@
   })
   })
 
+  $('#modal_history_bu').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget) // Button that triggered the modal
+  var buss = button.data('buss')
+  var db_type = button.data('db_type')
+  var url = 'backup_history?buss=' + buss + '&db_type=' + db_type
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.open("GET", url, false);
+  xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  xmlHttp.send()
+  alert('nini')
+  backup_history = xmlHttp.responseText
+  alert('bibi')
+  backup_history = JSON.parse(backup_history)
+  alert('hehe')
+  })
+  
   $('#modal_mysql_cluster').on('show.bs.modal', function (event) {
   var button = $(event.relatedTarget) // Button that triggered the modal
   var ip = button.data('ip')

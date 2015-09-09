@@ -17,6 +17,10 @@ class BackupList(CmdbApiBase):
         result = self.__call_interface__('BACKUP','get_config',json_obj=None)
         return result
 
+    def history(self,data):
+        result = self.__call_interface__('BACKUP','backup_history',json_obj=data)
+        return result
+
     def email_backup_report(self):
         result = self.__call_interface__('BACKUP','report',json_obj=None)
         return result

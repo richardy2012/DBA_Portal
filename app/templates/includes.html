@@ -36,7 +36,7 @@
     <!-- Custom Fonts -->
     <link href="{{ url_for('static', filename='font-awesome-4.1.0/css/font-awesome.min.css') }}" rel="stylesheet">
 
-    <link href="{{ url_for('static', filename="css/plugins/dataTables.bootstrap.css") }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/plugins/dataTables.bootstrap.css') }}" rel="stylesheet">
 
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -79,6 +79,10 @@
 
         <!-- datetime picker JavaScript -->
         <script src="{{ url_for('static', filename='js/plugins/laydate-v1.1/laydate/laydate.js') }}"></script>
+
+        <!-- highcharts JavaScript -->
+        <script src="{{ url_for('static', filename='js/plugins/Highcharts-4.1.8/js/highcharts.js') }}"></script>
+
         {% endblock %}
 
     </body>
