@@ -246,6 +246,8 @@ def fill_install_db_form(server_form=None, db_type=None, instance=None, comment=
     biz_list = server_list.list_supported_biz()
     if comment.get('bu','') != '':
         biz_li = get_product(comment['bu'])
+        if biz_li:
+            biz_li = json.loads(biz_li)
         biz_list = zip(biz_li,biz_li)
 
     server_form.dba_owner.choices = owner_list
@@ -540,26 +542,21 @@ def server_list():
         query_condition = get_parameters_from_url(request,supported_query_key)
         
         dba_portal_redis = DBAPortalRedis()
-
         server_list = ServerList()
         server_all = dba_portal_redis.get_server_all() if dba_portal_redis._redis.exists('server_all') else ''
         if not server_all:
             server_all = server_list.list_all()
             dba_portal_redis.set_json_with_expire('server_all', server_all, dba_portal_redis._expire_server_all)
-            
-
-        #all_servers = ServerList()
-        #filtered_servers = all_servers.list_all(data=query_condition)
-        filtered_servers = server_all
 
         instance_list = InstanceList()
         instance_all = dba_portal_redis.get_instance_all() if dba_portal_redis._redis.exists('instance_all') else ''
         if not instance_all:
             instance_all = instance_list.list_all()
             dba_portal_redis.set_json_with_expire('instance_all', instance_all, dba_portal_redis._expire_instance_all)
-
         instances = [instance['server_ip'] for instance in instance_all]
 
+        #filtered_servers = all_servers.list_all(data=query_condition)
+        filtered_servers = server_all
         page_data={}
         have_instance = []
         no_instance = []
@@ -837,10 +834,11 @@ def get_product(bu):
             for re in rep['products']:
                 product_bu += [re['product_name']]
             dba_portal_redis.set_json_with_expire(key, product_bu, 3600*24)
+            product_bu = json.dumps(product_bu)
         return product_bu
     except Exception,e:
         app.logger.error(str(e))
-        return ''
+        return json.dumps([])
 
 ###################################
 #instance function part
@@ -1216,10 +1214,41 @@ def backup_config(ip=None, port=None):
         return render_template('blank.html')
 
 
-@app.route("/backup_center")
-def backup_center():
+@app.route("/backup_history, methods=['GET', 'POST']")
+def backup_history():
+    """
+    Description: get backukup history
+    Example:
+    ### portal.dba.dp/backup_history?buss=zabbix&db_type=mysql
+    ### portal.dba.dp/backup_history?ip=10.1.101.125&port=3306
+    """
+
     if not have_accessed():
         return redirect(url_for('login'))
+    try:
+        supported_query_key = ['buss','db_type','ip','port']
+        query_condition = dict()
+        query_condition = get_parameters_from_url(request,supported_query_key)
+        query_condition = add_authority_parameters(query_condition)
+        if not (query_condition['db_type'] and (query_condition['buss'] or
+                (query_condition['ip'] and query_condition['port']))):
+            flash("parameters error: pass (buss, db_type) or (ip,port,dbtype)", 'danger')
+            return redirect('/backup_center')
+
+        backup_list = BackupList()
+        backup_history = backup_list.history(query_condition)
+        print backup_history
+        return json.dumps(backup_history)
+    except Exception,e:
+        app.logger.error(str(e))
+        flash(e,'danger')
+        return render_template('blank.html')
+
+
+@app.route("/backup_center")
+def backup_center():
+#    if not have_accessed():
+#        return redirect(url_for('login'))
     try:
         backup_list = BackupList()
         dba_portal_redis = DBAPortalRedis()
@@ -1228,6 +1257,7 @@ def backup_center():
         backup_single_instance = dba_portal_redis.get_backup_single_instance() if dba_portal_redis._redis.exists('backup_single_instance') else ''
         backup_configure = dba_portal_redis.get_backup_configure() if dba_portal_redis._redis.exists('backup_configure') else ''
         backup_mongo = dba_portal_redis.get_backup_mongo() if dba_portal_redis._redis.exists('backup_mongo') else ''
+        backup_history_bu = dba_portal_redis.get_backup_history_bu() if dba_portal_redis._redis.exists('backup_history_bu') else ''
 
         if not backup_mha:
             backup_mha = backup_list.mha()
@@ -1239,6 +1269,9 @@ def backup_center():
             #dba_portal_redis.set_backup_single_instance(backup_single_instance)
         if not backup_configure:
             backup_configure = backup_list.configure()
+            #dba_portal_redis.set_backup_configure(backup_configure)
+        if not backup_history_bu:
+            backup_history_bu = backup_list.history({"buss":"tgtp","dbtype":"mysql"})
             #dba_portal_redis.set_backup_configure(backup_configure)
 
         mha = sort_cluster_by_backup_status(backup_mha['mha'])
