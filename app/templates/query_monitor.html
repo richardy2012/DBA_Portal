@@ -5,6 +5,7 @@
 {% block page_wrapper %}
 
 <div id="monitor_lists">
+  <h4>{{ data["today"] }}</h4>
   {% set monitors = data["page_data"] %}
   {% set monitor_count = monitors | length %}
   {% for index in range(0,monitor_count) %}

@@ -1546,19 +1546,20 @@ def slowlog():
 
 @app.route("/query_monitor")
 def query_monitor():
-    if not have_accessed():
-        return redirect(url_for('login'))
+#    if not have_accessed():
+#        return redirect(url_for('login'))
     try:
         query_condition = {'product':['db-mysql-10.1.125.14-3306','db-mysql-10.1.125.15-3306','db-mysql-10.1.125.16-3306','db-mysql-10.1.125.18-3306','db-mysql-10.1.125.19-3306'], 'monitor_type':'questions'}
         #query_condition = {'product':['db-mysql-10.1.125.14-3306'], 'monitor_type':'questions'}
         monitor_list = Monitor()
-        print '#------------------#'
+#        print '#------------------#'
         hcs = monitor_list.monitor_subclass(query_condition)
-        print hcs
+#        print hcs
         hc_configs = json.dumps(hcs)
         data = {'page_data': hcs}
         today = time.strftime('%Y-%m-%d',time.localtime(time.time()))
-        data['page_name'] = "查询监控 " + today
+        data['page_name'] = "查询监控"
+        data['today'] = today
         data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
         data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
         return render_template('query_monitor.html', data=data, hc_configs=hc_configs)
@@ -1830,6 +1831,6 @@ def dashboard():
 
 if __name__ == "__main__":
     dba_portal_redis = DBAPortalRedis()
-    dba_portal_redis.reset_dba_portal_redis()
+#    dba_portal_redis.reset_dba_portal_redis()
     app.jinja_env.cache = None
     app.run(host='0.0.0.0', port=AppConfig.PORTAL_PORT)
