@@ -148,5 +148,5 @@ class Monitor():
 if __name__ == '__main__':
     test_monitor = Monitor()
     for timeRange in (1,2,6,12,24):
-        result = test_monitor.flush_redis('questions')
+        result = test_monitor.flush_redis('questions', timeRange)
         print result
