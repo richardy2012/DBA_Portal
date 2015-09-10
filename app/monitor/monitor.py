@@ -48,7 +48,7 @@ class Monitor():
         if not (data and data['product']):
             print 'monitor -- parameters error: do not have product'
             return False
-        url = 'http://cat.dp/cat/r/database?op=view&group=&timeRange=1&forceDownload=json'
+        url = 'http://cat.dp/cat/r/database?op=view&group=&timeRange=2&forceDownload=json'
         for key in data:
             url += ('&' + key + '=' +data[key])
 
