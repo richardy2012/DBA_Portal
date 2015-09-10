@@ -1549,25 +1549,23 @@ def query_monitor():
 #    if not have_accessed():
 #        return redirect(url_for('login'))
     try:
-        supported_query_key = ['monitor_type']
+        supported_query_key = ['monitor_type', 'timeRange']
         query_condition = get_parameters_from_url(request,supported_query_key)
         monitor_type = query_condition['monitor_type'] if query_condition.has_key('monitor_type') else ''
+        print query_condition
         if not monitor_type:
             monitor_type = "questions"
-
+        query_condition['monitor_type'] = monitor_type
 
         product_list = []
         not_in_cat = ("10.1.110.145")
         for ip in ("10.1.125.16"):
             tmp_product = 'db-mysql-' + ip + '-3306'
             product_list.append(tmp_product)
+        query_condition['product'] = product_list
 
-        query_condition = {'product':product_list, 'monitor_type':monitor_type}
-        #query_condition = {'product':['db-mysql-10.1.125.14-3306'], 'monitor_type':'questions'}
         monitor_list = Monitor()
-#        print '#------------------#'
         hcs = monitor_list.monitor_subclass(query_condition)
-#        print hcs
         hc_configs = json.dumps(hcs)
         data = {'page_data': hcs}
         today = time.strftime('%Y-%m-%d',time.localtime(time.time()))

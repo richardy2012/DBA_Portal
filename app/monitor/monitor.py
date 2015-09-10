@@ -48,7 +48,7 @@ class Monitor():
         if not (data and data['product']):
             print 'monitor -- parameters error: do not have product'
             return False
-        url = 'http://cat.dp/cat/r/database?op=view&group=&timeRange=2&forceDownload=json'
+        url = 'http://cat.dp/cat/r/database?op=view&forceDownload=json'
         for key in data:
             url += ('&' + key + '=' +data[key])
 
@@ -101,13 +101,17 @@ class Monitor():
         data['product'] = self._monitor_ip_lists
         for monitor_ip in data['product']:
             redis_key = "monitor_" + data['monitor_type'] + "_" + monitor_ip
+            if not data.has_key('timeRange'):
+                data['timeRange'] = 24
+            redis_key += ("_" + str(data['timeRange']))
             product = "db-mysql-" + monitor_ip + "-3306"
+            data['product'] = product
             monitor_all = dba_portal_redis.get_monitor_all(redis_key) if dba_portal_redis._redis.exists(redis_key) else ''
 
             if not monitor_all:
-                monitor_all = self.list_all({'product':product})
+                monitor_all = self.list_all(data)
                 if monitor_all and monitor_all["lineCharts"]:
-                    dba_portal_redis.set_json_with_expire(redis_key, monitor_all, 300)
+                    dba_portal_redis.set_json_with_expire(redis_key, monitor_all, 300 * int(data['timeRange']))
 
             monitor_id = "cat:Metric:" + data['monitor_type'] + ":SUM"
             hc = None
@@ -122,22 +126,27 @@ class Monitor():
         return hcs
 
 
-    def flush_redis(self, monitor_type):
+    def flush_redis(self, monitor_type, timeRange=24):
         dba_portal_redis = DBAPortalRedis()
-        for product in self._monitor_ip_lists:
-            redis_key = "monitor_" + monitor_type + "_" + product
-            product = "db-mysql-" + product + "-3306"
+        for monitor_ip in self._monitor_ip_lists:
+            redis_key = "monitor_" + monitor_type + "_" + monitor_ip
+            if not timeRange:
+                timeRange = 24
+            redis_key += ("_" + str(timeRange))
+
+            product = "db-mysql-" + monitor_ip + "-3306"
             monitor_all = dba_portal_redis.get_monitor_all(redis_key) if dba_portal_redis._redis.exists(redis_key) else ''
 
             if not monitor_all:
                 monitor_all = self.list_all({'product':product})
                 if monitor_all and monitor_all["lineCharts"]:
-                    dba_portal_redis.set_json_with_expire(redis_key, monitor_all, 300)
+                    dba_portal_redis.set_json_with_expire(redis_key, monitor_all, 180 * int(timeRange))
         return True
 
 
 
 if __name__ == '__main__':
     test_monitor = Monitor()
-    result = test_monitor.flush_redis('questions')
-    print result
+    for timeRange in (1,2,6,12,24):
+        result = test_monitor.flush_redis('questions')
+        print result

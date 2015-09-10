@@ -8,7 +8,14 @@
   <div id="monitor_type_list">
     <div id="monitor_type">
       <h4>{{ data["today"] }}</h4>
-      <form role="form"  action="{{ url_for('query_monitor') }}" class="form-inline" method="POST">
+      
+      &nbsp;&nbsp;时间段 
+      
+      &nbsp;&nbsp;&nbsp;[ <a href="{{ url_for('query_monitor') }}?timeRange=1">1小时</a>]
+      &nbsp;&nbsp;&nbsp;[<a href="{{ url_for('query_monitor') }}?timeRange=2">2小时</a>]
+      &nbsp;&nbsp;&nbsp;[<a href="{{ url_for('query_monitor') }}?timeRange=6">6小时</a>]
+      &nbsp;&nbsp;&nbsp;[<a href="{{ url_for('query_monitor') }}?timeRange=12">12小时</a>]
+      &nbsp;&nbsp;&nbsp;[<a href="{{ url_for('query_monitor') }}?timeRange=24">24小时</a>]
 
       <!-- <select id="buss" name="buss" ></select> -->
     </div>
