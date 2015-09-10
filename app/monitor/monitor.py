@@ -25,7 +25,8 @@ class Monitor():
         "10.3.10.55":"tgstock","10.3.10.66":"tgstock",
         "10.3.10.23":"bonus","10.3.10.53":"bonus",
         "10.1.101.131":"tgreceipt","10.1.101.132":"tgreceipt","10.1.101.120":"tgreceipt","10.1.101.92":"tgreceipt",
-        "10.3.10.68":"pctdiscount","10.3.10.69":"pctdiscount"
+        "10.3.10.68":"pctdiscount","10.3.10.69":"pctdiscount",
+        "10.1.110.108":"mopay","10.1.110.110":"mopay"
         }
     def __init__(self):
         #print monitor_config.MONITOR_IPS
