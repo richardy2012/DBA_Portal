@@ -1172,8 +1172,6 @@ def set_backup_config():
         supported_query_key = ['id','ip','time','port']
         query_condition = dict()
         query_condition = get_parameters_from_url(request,supported_query_key)
-        print '#--------------#'
-        print query_condition
         
 # query_condition = add_authority_parameters(query_condition)
 
@@ -1205,8 +1203,6 @@ def backup_config(ip=None, port=None):
         data['page_name']="配置备份参数"
         data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
         data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
-        print '##--------------#'
-        flash(data, 'danger')
         return render_template('blank.html')
         #return render_template('backup_config.html', data=data)
     except Exception,e:
@@ -1230,8 +1226,6 @@ def backup_history():
         supported_query_key = ['buss','db_type','ip','port']
         query_condition = dict()
         query_condition = get_parameters_from_url(request,supported_query_key)
-        print '#--##############################'
-        print query_condition
         query_condition = add_authority_parameters(query_condition)
         if not (query_condition['db_type'] and (query_condition['buss'] or
                 (query_condition['ip'] and query_condition['port']))):
@@ -1240,7 +1234,7 @@ def backup_history():
 
         backup_list = BackupList()
         backup_history = backup_list.history(query_condition)
-        print backup_history
+        #print backup_history
         return json.dumps(backup_history)
     except Exception,e:
         app.logger.error(str(e))

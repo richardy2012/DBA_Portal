@@ -8,6 +8,20 @@
   <div id="monitor_type_list">
     <div id="monitor_type">
       <h4>{{ data["today"] }}</h4>
+
+      <form action="query_monitor" id="monitor_type_form">
+	<select name="monitor_type" form="monitor_type_form">
+	  <option value="questions">questions</option>
+	  <option value="tps">tps</option>
+	  <option value="io_util">io_util</option>
+	  <option value="iops">iops</option>
+	  <option value="usr">usr</option>
+	  <option value="sys">sys</option>
+	  <option value="thds_run">thds_run</option>
+	  <option value="network_out">network_out</option>
+	</select> 
+	<input type="submit">
+      </form>
       
       &nbsp;&nbsp;时间段 
       

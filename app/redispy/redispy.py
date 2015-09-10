@@ -93,7 +93,8 @@ class DBAPortalRedis(object):
         ### set_with_expire('server', {'test':1}, 10)
         ### server is "{\"test\": 1}}", and will live 10s
         '''
-        if not (type(key) is str and (type(expire) is int or type(expire) is float)):
+        if not ((type(key) is str or type(key) is unicode) and
+                (type(expire) is int or type(expire) is float)):
             print "wrong parameters."
             print "set_with_expire('server', {'test':1}, 10)"
             return False

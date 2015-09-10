@@ -461,7 +461,7 @@ class Monitor():
             return False
         url = 'http://cat.dp/cat/r/database?op=view&forceDownload=json'
         for key in data:
-            url += ('&' + key + '=' +data[key])
+            url += ('&' + key + '=' + str(data[key]))
 
         print url
         result = requests.get(url, timeout=20).json()
@@ -522,7 +522,7 @@ class Monitor():
             if not monitor_all:
                 monitor_all = self.list_all(data)
                 if monitor_all and monitor_all["lineCharts"]:
-                    dba_portal_redis.set_json_with_expire(redis_key, monitor_all, 300 * int(data['timeRange']))
+                    dba_portal_redis.set_json_with_expire(redis_key, monitor_all, (10 + 10 * int(data['timeRange'])))
 
             monitor_id = "cat:Metric:" + data['monitor_type'] + ":SUM"
             hc = None
@@ -582,7 +582,7 @@ class Monitor():
             if not monitor_all:
                 monitor_all = self.list_all({'product':product})
                 if monitor_all and monitor_all["lineCharts"]:
-                    dba_portal_redis.set_json_with_expire(redis_key, monitor_all, 180 * int(timeRange))
+                    dba_portal_redis.set_json_with_expire(redis_key, monitor_all, (10 + 10 * int(timeRange)))
         return True
 
 
@@ -590,5 +590,6 @@ class Monitor():
 if __name__ == '__main__':
     test_monitor = Monitor()
     for timeRange in (1,2,6,12,24):
-        result = test_monitor.flush_redis('questions', timeRange)
-        print result
+        for monitor_type in ("questions","tps","io_util","iops","usr","sys","thds_run","network_out"):
+            result = test_monitor.flush_redis(monitor_type, timeRange)
+            print result
