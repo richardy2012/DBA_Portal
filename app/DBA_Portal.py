@@ -245,7 +245,7 @@ def fill_install_db_form(server_form=None, db_type=None, instance=None, comment=
     server_list = ServerList()
     owner_list = server_list.list_supported_dba()
     biz_list = server_list.list_supported_biz()
-    if comment.get('bu','') != '':
+    if comment.has_key('bu') and comment['bu']:
         biz_li = get_product(comment['bu'])
         if biz_li:
             biz_li = json.loads(biz_li)
@@ -1549,7 +1549,7 @@ def query_monitor():
 #    if not have_accessed():
 #        return redirect(url_for('login'))
     try:
-        supported_query_key = ['monitor_type', 'timeRange']
+        supported_query_key = ['monitor_type', 'timeRange', 'monitor_range']
         query_condition = get_parameters_from_url(request,supported_query_key)
         monitor_type = query_condition['monitor_type'] if query_condition.has_key('monitor_type') else ''
         print query_condition
@@ -1565,15 +1565,23 @@ def query_monitor():
         query_condition['product'] = product_list
 
         monitor_list = Monitor()
-        hcs = monitor_list.monitor_subclass(query_condition)
+        hcs = None
+        if query_condition.has_key('monitor_range'):
+            hcs = monitor_list.monitor_all_mha(query_condition)
+        else:
+            hcs = monitor_list.monitor_subclass(query_condition)
         hc_configs = json.dumps(hcs)
+        tmp_config= ''
+        for key in query_condition:
+            if key != 'timeRange':
+                tmp_config += (key + '=' + str(query_condition[key]) + '&')
         data = {'page_data': hcs}
         today = time.strftime('%Y-%m-%d',time.localtime(time.time()))
         data['page_name'] = "917重点监控"
         data['today'] = today
         data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
         data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
-        return render_template('query_monitor.html', data=data, hc_configs=hc_configs)
+        return render_template('query_monitor.html', data=data, hc_configs=hc_configs, tmp_config=tmp_config)
     except Exception,e:
         app.logger.error(str(e))
         flash(e,'danger')
