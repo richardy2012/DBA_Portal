@@ -10,13 +10,13 @@ from redispy.redispy import DBAPortalRedis
 #from cmdb_api_base import CmdbApiBase
 
 class Monitor():
-    _monitor_ip_lists = []
+    _monitor_ip_lists = ["10.1.125.16","10.1.125.15","10.1.125.14","10.1.125.11","10.1.125.23","10.1.6.40","10.1.6.41","10.1.6.114","10.1.6.115","10.1.110.62","10.1.110.64","10.1.110.145","10.1.101.136","10.1.101.158","10.1.101.130","10.1.125.12","10.1.125.13","10.1.125.192","10.1.101.143","10.1.101.15","10.1.101.36","10.1.101.149","10.1.101.98","10.1.101.174","10.1.101.161","10.1.6.226","10.1.6.225","10.1.6.230","10.3.10.55","10.3.10.66","10.3.10.23","10.3.10.53","10.1.101.131","10.1.101.132","10.1.101.120","10.1.101.92","10.3.10.68","10.3.10.69","10.1.110.108","10.1.110.110","10.1.1.135","10.1.1.205"]
     _monitor_ip_dict = {
         "10.1.125.16":"pctorder","10.1.125.15":"pctorder","10.1.125.14":"pctorder",
         "10.1.125.11":"paybase","10.1.125.23":"paybase",
         "10.1.6.40":"tpfun","10.1.6.41":"tpfun",
         "10.1.6.114":"tgtp","10.1.6.115":"tgtp",
-        "10.1.110.62":"pctaccount","10.1.110.64":"pctaccount",
+        "10.1.110.62":"pctaccount","10.1.110.64":"pctaccount","10.1.110.145":"pctaccount",
         "10.1.101.136":"pctchannel","10.1.101.158":"pctchannel","10.1.101.130":"pctchannel",
         "10.1.125.12":"pctengine","10.1.125.13":"pctengine","10.1.125.192":"pctengine",
         "10.1.101.143":"dianpingpct","10.1.101.15":"dianpingpct","10.1.101.36":"dianpingpct",
@@ -26,11 +26,13 @@ class Monitor():
         "10.3.10.23":"bonus","10.3.10.53":"bonus",
         "10.1.101.131":"tgreceipt","10.1.101.132":"tgreceipt","10.1.101.120":"tgreceipt","10.1.101.92":"tgreceipt",
         "10.3.10.68":"pctdiscount","10.3.10.69":"pctdiscount",
-        "10.1.110.108":"mopay","10.1.110.110":"mopay"
+        "10.1.110.108":"mopay","10.1.110.110":"mopay",
+        "10.1.1.135":"tgreceiptstock","10.1.1.205":"tgreceiptstock"
         }
     def __init__(self):
-        #print monitor_config.MONITOR_IPS
-        self._monitor_ip_lists = self.parse_ips(monitor_config.MONITOR_IPS)
+        pass
+#print monitor_config.MONITOR_IPS
+        #self._monitor_ip_lists = self.parse_ips(monitor_config.MONITOR_IPS)
         
     def parse_ips(self, ip_str):
         ip_lists = []

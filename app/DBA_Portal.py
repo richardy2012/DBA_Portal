@@ -1571,7 +1571,7 @@ def query_monitor():
         hc_configs = json.dumps(hcs)
         data = {'page_data': hcs}
         today = time.strftime('%Y-%m-%d',time.localtime(time.time()))
-        data['page_name'] = "查询监控"
+        data['page_name'] = "917重点监控"
         data['today'] = today
         data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
         data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
