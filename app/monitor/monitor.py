@@ -589,7 +589,9 @@ class Monitor():
 
 if __name__ == '__main__':
     test_monitor = Monitor()
+#    for timeRange in (1,2,6,12,24):
+#        for monitor_type in ("questions","tps","io_util","iops","usr","sys","thds_run","network_out"):
     for timeRange in (1,2,6,12,24):
-        for monitor_type in ("questions","tps","io_util","iops","usr","sys","thds_run","network_out"):
+        for monitor_type in ("questions"):
             result = test_monitor.flush_redis(monitor_type, timeRange)
             print result
