@@ -1544,12 +1544,25 @@ def slowlog():
         flash(msg, 'danger')
         return render_template('blank.html')
 
-@app.route("/query_monitor")
+@app.route("/query_monitor",methods=['POST','GET'])
 def query_monitor():
 #    if not have_accessed():
 #        return redirect(url_for('login'))
     try:
-        query_condition = {'product':['db-mysql-10.1.125.14-3306','db-mysql-10.1.125.15-3306','db-mysql-10.1.125.16-3306','db-mysql-10.1.125.18-3306','db-mysql-10.1.125.19-3306'], 'monitor_type':'questions'}
+        supported_query_key = ['monitor_type']
+        query_condition = get_parameters_from_url(request,supported_query_key)
+        monitor_type = query_condition['monitor_type'] if query_condition.has_key('monitor_type') else ''
+        if not monitor_type:
+            monitor_type = "questions"
+
+
+        product_list = []
+        not_in_cat = ("10.1.110.145")
+        for ip in ("10.1.125.16","10.1.125.15","10.1.125.14","10.1.125.11","10.1.125.23","10.1.6.40","10.1.6.41","10.1.6.114","10.1.6.115","10.1.110.62","10.1.110.64","10.1.101.136","10.1.101.158","10.1.101.130","10.1.125.12","10.1.125.13","10.1.125.192","10.1.101.143","10.1.101.15","10.1.101.36","10.1.101.149","10.1.101.98","10.1.101.174","10.1.101.161","10.1.6.226","10.1.6.225","10.1.6.230","10.3.10.55","10.3.10.66","10.3.10.23","10.3.10.53","10.1.101.131","10.1.101.132","10.1.101.120","10.1.101.92","10.3.10.68","10.3.10.69"):
+            tmp_product = 'db-mysql-' + ip + '-3306'
+            product_list.append(tmp_product)
+
+        query_condition = {'product':product_list, 'monitor_type':monitor_type}
         #query_condition = {'product':['db-mysql-10.1.125.14-3306'], 'monitor_type':'questions'}
         monitor_list = Monitor()
 #        print '#------------------#'
@@ -1831,6 +1844,6 @@ def dashboard():
 
 if __name__ == "__main__":
     dba_portal_redis = DBAPortalRedis()
-#    dba_portal_redis.reset_dba_portal_redis()
+    #dba_portal_redis.reset_dba_portal_redis()
     app.jinja_env.cache = None
     app.run(host='0.0.0.0', port=AppConfig.PORTAL_PORT)

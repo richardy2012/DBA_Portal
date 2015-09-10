@@ -5,7 +5,14 @@
 {% block page_wrapper %}
 
 <div id="monitor_lists">
-  <h4>{{ data["today"] }}</h4>
+  <div id="monitor_type_list">
+    <div id="monitor_type">
+      <h4>{{ data["today"] }}</h4>
+      <form role="form"  action="{{ url_for('query_monitor') }}" class="form-inline" method="POST">
+
+      <select id="buss" name="buss" ></select>
+    </div>
+  </div>
   {% set monitors = data["page_data"] %}
   {% set monitor_count = monitors | length %}
   {% for index in range(0,monitor_count) %}
