@@ -201,6 +201,11 @@ class DBAPortalRedis(object):
         return instance_all
 
 
+    def get_monitor_all(self, key):
+        monitor_all = json.loads(self._redis.get(key))
+        return monitor_all
+
+
 if __name__ == '__main__':
     test = DBAPortalRedis()
     test.reset_dba_portal_redis()

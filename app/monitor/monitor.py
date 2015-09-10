@@ -3,9 +3,44 @@ __author__ = 'caodanfeng'
 import urllib2
 import urllib
 import json,requests,time
+import sys
+import monitor_config
+sys.path.append("..")
+from redispy.redispy import DBAPortalRedis
 #from cmdb_api_base import CmdbApiBase
 
 class Monitor():
+    _monitor_ip_lists = []
+    _monitor_ip_dict = {
+        "10.1.125.16":"pctorder","10.1.125.15":"pctorder","10.1.125.14":"pctorder",
+        "10.1.125.11":"paybase","10.1.125.23":"paybase",
+        "10.1.6.40":"tpfun","10.1.6.41":"tpfun",
+        "10.1.6.114":"tgtp","10.1.6.115":"tgtp",
+        "10.1.110.62":"pctaccount","10.1.110.64":"pctaccount",
+        "10.1.101.136":"pctchannel","10.1.101.158":"pctchannel","10.1.101.130":"pctchannel",
+        "10.1.125.12":"pctengine","10.1.125.13":"pctengine","10.1.125.192":"pctengine",
+        "10.1.101.143":"dianpingpct","10.1.101.15":"dianpingpct","10.1.101.36":"dianpingpct",
+        "10.1.101.149":"deal","10.1.101.98":"deal","10.1.101.174":"deal","10.1.101.161":"deal",
+        "10.1.6.226":"tpd_deal","10.1.6.225":"tpd_deal","10.1.6.230":"tpd_deal",
+        "10.3.10.55":"tgstock","10.3.10.66":"tgstock",
+        "10.3.10.23":"bonus","10.3.10.53":"bonus",
+        "10.1.101.131":"tgreceipt","10.1.101.132":"tgreceipt","10.1.101.120":"tgreceipt","10.1.101.92":"tgreceipt",
+        "10.3.10.68":"pctdiscount","10.3.10.69":"pctdiscount"
+        }
+    def __init__(self):
+        #print monitor_config.MONITOR_IPS
+        self._monitor_ip_lists = self.parse_ips(monitor_config.MONITOR_IPS)
+        
+    def parse_ips(self, ip_str):
+        ip_lists = []
+        if not ip_str:
+            return ip_lists
+        infoes = ip_str.split(',')
+        for info in infoes:
+            ip_lists.append(info)
+        return ip_lists
+
+
     def list_all(self, data=None):
         if not (data and data['product']):
             print 'monitor -- parameters error: do not have product'
@@ -59,23 +94,47 @@ class Monitor():
             return False
         
         hcs = []
-        for product in data['product']:
-            monitor_all = self.list_all({'product':product})
+        dba_portal_redis = DBAPortalRedis()
+        data['product'] = self._monitor_ip_lists
+        for monitor_ip in data['product']:
+            redis_key = "monitor_" + data['monitor_type'] + "_" + monitor_ip
+            product = "db-mysql-" + monitor_ip + "-3306"
+            monitor_all = dba_portal_redis.get_monitor_all(redis_key) if dba_portal_redis._redis.exists(redis_key) else ''
+
+            if not monitor_all:
+                monitor_all = self.list_all({'product':product})
+                if monitor_all and monitor_all["lineCharts"]:
+                    dba_portal_redis.set_json_with_expire(redis_key, monitor_all, 180)
+
             monitor_id = "cat:Metric:" + data['monitor_type'] + ":SUM"
             hc = None
             for key1 in monitor_all:
                 for lineChart in monitor_all[key1]:
                     if lineChart['id'] == monitor_id:
                         hc = lineChart
-            hc = self.cat2hc(hc, product)
+
+            hc_title = self._monitor_ip_dict[monitor_ip] + "-" + monitor_ip + ":3306"
+            hc = self.cat2hc(hc, hc_title)
             hcs.append(hc)
         return hcs
 
+
+    def flush_redis(self, monitor_type):
+        dba_portal_redis = DBAPortalRedis()
+        for product in self._monitor_ip_lists:
+            redis_key = "monitor_" + monitor_type + "_" + product
+            product = "db-mysql-" + product + "-3306"
+            monitor_all = dba_portal_redis.get_monitor_all(redis_key) if dba_portal_redis._redis.exists(redis_key) else ''
+
+            if not monitor_all:
+                monitor_all = self.list_all({'product':product})
+                if monitor_all and monitor_all["lineCharts"]:
+                    dba_portal_redis.set_json_with_expire(redis_key, monitor_all, 180)
+        return True
 
 
 
 if __name__ == '__main__':
     test_monitor = Monitor()
-    query_condition = {'product':'db-mysql-10.1.125.14-3306', 'monitor_type':'questions'}
-    result = test_monitor.monitor_subclass(query_condition)
+    result = test_monitor.flush_redis('questions')
     print result

@@ -1354,7 +1354,7 @@ def backup_report():
         backup_list = BackupList()
         if not backup_email_backup_report:
             backup_email_backup_report = backup_list.email_backup_report()
-            dba_portal_redis.set_backup_email_backup_report(backup_email_backup_report)
+            dba_portal_redis.set_backup_email_backup_report(backup_email_backup_report, 3600*24)
 
         result = backup_email_backup_report
         file_backup = FileBackup()
@@ -1558,7 +1558,7 @@ def query_monitor():
 
         product_list = []
         not_in_cat = ("10.1.110.145")
-        for ip in ("10.1.125.16","10.1.125.15","10.1.125.14","10.1.125.11","10.1.125.23","10.1.6.40","10.1.6.41","10.1.6.114","10.1.6.115","10.1.110.62","10.1.110.64","10.1.101.136","10.1.101.158","10.1.101.130","10.1.125.12","10.1.125.13","10.1.125.192","10.1.101.143","10.1.101.15","10.1.101.36","10.1.101.149","10.1.101.98","10.1.101.174","10.1.101.161","10.1.6.226","10.1.6.225","10.1.6.230","10.3.10.55","10.3.10.66","10.3.10.23","10.3.10.53","10.1.101.131","10.1.101.132","10.1.101.120","10.1.101.92","10.3.10.68","10.3.10.69"):
+        for ip in ("10.1.125.16"):
             tmp_product = 'db-mysql-' + ip + '-3306'
             product_list.append(tmp_product)
 
