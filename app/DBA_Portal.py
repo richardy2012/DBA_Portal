@@ -1354,7 +1354,7 @@ def backup_report():
         backup_list = BackupList()
         if not backup_email_backup_report:
             backup_email_backup_report = backup_list.email_backup_report()
-            dba_portal_redis.set_backup_email_backup_report(backup_email_backup_report, 3600*24)
+            dba_portal_redis.set_backup_email_backup_report(backup_email_backup_report)
 
         result = backup_email_backup_report
         file_backup = FileBackup()
