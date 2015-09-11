@@ -112,12 +112,19 @@
 	      <td>是</td>
 	      {% if cluster[cluster_name][ip].status=='成功' %}
 	      <td style="color:green">
+		{{ cluster[cluster_name][ip].status }}
 		{% elif cluster[cluster_name][ip].status=='失败' %}
 	      <td style="color:red">
+                {{ cluster[cluster_name][ip].status }}
                 {% else %}
 	      <td style="color:blue">
-                {% endif %}
-                {{ cluster[cluster_name][ip].status }}
+		{{ cluster[cluster_name][ip].status }} &nbsp;进度:
+		{% if cluster[cluster_name][ip].process != -1 %}
+		{{ cluster[cluster_name][ip].process * 100 }}%
+		{% else %}
+		无法估计
+		{% endif%}
+		{% endif %}
 	      </td>
 	      <td>
                 <a href="{{ url_for('del_backup',ip=ip,port=cluster[cluster_name][ip]['port'],template='backup') }}" {{disabled}} onclick="return confirm('确认删除{{ ip }}:{{ cluster[cluster_name][ip].port }}的备份吗？')" disabled class="btn btn-danger btn-xs"/>

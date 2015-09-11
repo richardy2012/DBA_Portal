@@ -522,7 +522,7 @@ class Monitor():
             if not monitor_all:
                 monitor_all = self.list_all(data)
                 if monitor_all and monitor_all["lineCharts"]:
-                    dba_portal_redis.set_json_with_expire(redis_key, monitor_all, (10 + 10 * int(data['timeRange'])))
+                    dba_portal_redis.set_json_with_expire(redis_key, monitor_all, (600 + 600 * int(data['timeRange'])))
 
             monitor_id = "cat:Metric:" + data['monitor_type'] + ":SUM"
             hc = None
@@ -582,7 +582,7 @@ class Monitor():
             if not monitor_all:
                 monitor_all = self.list_all({'product':product})
                 if monitor_all and monitor_all["lineCharts"]:
-                    dba_portal_redis.set_json_with_expire(redis_key, monitor_all, (10 + 10 * int(timeRange)))
+                    dba_portal_redis.set_json_with_expire(redis_key, monitor_all, (600 + 600 * int(timeRange)))
         return True
 
 

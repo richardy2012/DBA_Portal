@@ -172,7 +172,7 @@ class DBAPortalRedis(object):
         backup_email_backup_report = json.dumps(data,ensure_ascii=False)
         pipeline = self._redis.pipeline()
         pipeline.set('backup_email_backup_report', backup_email_backup_report)
-        pipeline.expire('backup_email_backup_report', 3600*24)
+        pipeline.expire('backup_email_backup_report', 3600*6)
         pipeline.execute()
         return backup_email_backup_report
 
