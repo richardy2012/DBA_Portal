@@ -827,7 +827,9 @@ def get_product(bu):
     try:
         dba_portal_redis = DBAPortalRedis()
         key = 'product_bu_' + str(hash(bu))
-        product_bu = dba_portal_redis.get_product_bu(key) if dba_portal_redis._redis.exists(key) else ''
+        #product_bu = dba_portal_redis.get_product_bu(key) if dba_portal_redis._redis.exists(key) else ''
+        product_bu = ''
+                
         if not product_bu:
             product_bu = []
             url = "http://api.cmdb.dp/api/v0.1/bu/"+bu+"/products"
@@ -1543,7 +1545,7 @@ def query_monitor():
 #    if not have_accessed():
 #        return redirect(url_for('login'))
     try:
-        supported_query_key = ['monitor_type', 'timeRange', 'monitor_range']
+        supported_query_key = ['monitor_type', 'timeRange', 'monitor_range', 'date']
         query_condition = get_parameters_from_url(request,supported_query_key)
         monitor_type = query_condition['monitor_type'] if query_condition.has_key('monitor_type') else ''
         print query_condition
@@ -1570,9 +1572,11 @@ def query_monitor():
             if key != 'timeRange':
                 tmp_config += (key + '=' + str(query_condition[key]) + '&')
         data = {'page_data': hcs}
-        today = time.strftime('%Y-%m-%d',time.localtime(time.time()))
+        if query_condition.has_key('date'):
+            data['date'] = query_condition['date']
+        else:
+            data['date'] = time.strftime('%Y%m%d%H',time.localtime(time.time()))
         data['page_name'] = "917重点监控"
-        data['today'] = today
         data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
         data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
         return render_template('query_monitor.html', data=data, hc_configs=hc_configs, tmp_config=tmp_config)
