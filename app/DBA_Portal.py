@@ -1545,13 +1545,13 @@ def query_monitor():
 #    if not have_accessed():
 #        return redirect(url_for('login'))
     try:
-        supported_query_key = ['monitor_type', 'timeRange', 'monitor_range', 'date']
+        supported_query_key = ['type', 'timeRange', 'monitor_range', 'date']
         query_condition = get_parameters_from_url(request,supported_query_key)
-        monitor_type = query_condition['monitor_type'] if query_condition.has_key('monitor_type') else ''
+        monitor_type = query_condition['type'] if query_condition.has_key('type') else ''
         print query_condition
         if not monitor_type:
             monitor_type = "questions"
-        query_condition['monitor_type'] = monitor_type
+        query_condition['type'] = monitor_type
 
         product_list = []
         not_in_cat = ("10.1.110.145")
