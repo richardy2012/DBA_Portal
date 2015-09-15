@@ -74,7 +74,7 @@
 			{% endif %}
 		      </td>
 		      {% if table_data["disk_use"] %}
-		      {% if table_data["disk_use"] >= '90%' %}
+		      {% if table_data["disk_use"] >= '90%' or table_data["disk_use"] == '100%' %}
 		      <td style="{{style_backup_summary_table_td}} color:red;font-weight:bold;">
 			{% else %}
 		      <td style="{{style_backup_summary_table_td}}">

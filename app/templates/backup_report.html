@@ -82,9 +82,9 @@
                     <td style="{{style_backup_summary_table_td}} color:green;">{{ table_data["success"] }}</td>
                     <td style="{{style_backup_summary_table_td}} color:red;font-weight:bold;">{{ table_data["failed"] }}</td>
 		    <td style="{{style_backup_summary_table_td}} color:blue;">{{ table_data["noback"] }}</td>
-                    <td style="{{style_backup_summary_table_td}}">{{ table_data["bak_server"] }}</td>
+                    <td style="{{style_backup_summary_table_td}}">{{ table_data["bak_server"] }}...</td>
 		    <td style="{{style_backup_summary_table_td}}">{{ table_data["data_size"] }}</td>
-		    {% if table_data["disk_use"] >= '90%' %}
+		    {% if table_data["disk_use"] >= '90%' or table_data["disk_use"] == '100%' %}
     <td style="{{style_backup_summary_table_td}} color:red;font-weight:bold;">
       {% else %}
     <td style="{{style_backup_summary_table_td}}">
