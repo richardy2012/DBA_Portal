@@ -2,36 +2,34 @@
 
 ---
 
-**DBA Portal** ÊÇÒ»¿îÓÃÓÚÊı¾İ¿â×Ô¶¯»¯ÔËÎ¬µÄwebÓ¦ÓÃ¡£
+**DBA Portal** æ˜¯ä¸€æ¬¾ç”¨äºæ•°æ®åº“è‡ªåŠ¨åŒ–è¿ç»´çš„webåº”ç”¨ã€‚
 
-###Ö÷Òª°üº¬ÒÔÏÂ¹¦ÄÜ£º
+###ä¸»è¦åŒ…å«ä»¥ä¸‹åŠŸèƒ½ï¼š
 
-- ·şÎñÆ÷¹ÜÀí£º·şÎñÆ÷µÄÉêÇëºÍ¹ÜÀí£»
+- æœåŠ¡å™¨ç®¡ç†ï¼šæœåŠ¡å™¨çš„ç”³è¯·å’Œç®¡ç†ï¼›
 
-- Êı¾İ¿â¹ÜÀí£ºMySQL¡¢MongoDB¡¢MemcachedÊı¾İ¿âµÄ²¿Êğ°²×°ÓëÏÂÏß£»
+- æ•°æ®åº“ç®¡ç†ï¼šMySQLã€MongoDBã€Memcachedæ•°æ®åº“çš„éƒ¨ç½²å®‰è£…ä¸ä¸‹çº¿ï¼›
 
-- DBÊµÀı¹ÜÀí£ºMySQL¡¢MongoDB¡¢MemcachedÊµÀıµÄÉÏÏÂÏß£»
+- DBå®ä¾‹ç®¡ç†ï¼šMySQLã€MongoDBã€Memcachedå®ä¾‹çš„ä¸Šä¸‹çº¿ï¼›
 
-- DB¼¯Èº¹ÜÀí£ºMHA¼¯ÈºĞÅÏ¢µÄ²éÑ¯
+- DBé›†ç¾¤ç®¡ç†ï¼šMHAé›†ç¾¤ä¿¡æ¯çš„æŸ¥è¯¢ï¼›
 
-- ±¸·İÖĞĞÄ£ºMySQL¼¯ÈºÓëMySQLµ¥ÊµÀıµÄ±¸·İÅäÖÃÓë±¸·İ¹ÜÀí
- 
-- Êı¾İ¿â±¸·İÈÕ±¨
+- å¤‡ä»½ä¸­å¿ƒï¼šMySQLé›†ç¾¤ã€MongoDBé›†ç¾¤ã€MySQLå•å®ä¾‹çš„å¤‡ä»½é…ç½®ï¼Œå¤‡ä»½ç®¡ç†ï¼Œå¤‡ä»½æ—¥æŠ¥ï¼›
+
+- å®æ—¶ç›‘æ§ï¼šå¤§ç›˜å®æ—¶ã€è‡ªé€‰åº“å®æ—¶ã€å†å²åˆ†æï¼›
 
 
 
-###DBA Portal »ù±¾¼Ü¹¹£º
+###DBA Portal åŸºæœ¬æ¶æ„ï¼š
 
-- Python Web ¿ª·¢¿ò¼Ü [Flask](http://flask.pocoo.org/)£»
+- Python Web å¼€å‘æ¡†æ¶[Flask](http://flask.pocoo.org/);
 
-- Ç°¶ËÄ£°åÀ´×Ô [startbootstrap.com/](http://startbootstrap.com/template-overviews/sb-admin-2/);
+- å‰ç«¯æ¨¡æ¿æ¥è‡ª[startbootstrap.com/](http://startbootstrap.com/template-overviews/sb-admin-2/);
 
-- Web template [jinja](http://jinja.pocoo.org/docs/dev/);
+- Pythonè™šæ‹Ÿç¯å¢ƒ[virtualenv](https://virtualenv.pypa.io/);
 
-- Python ĞéÄâ»·¾³[virtualenv](https://virtualenv.pypa.io/);
+- æ•°æ®åº“ MySQL 5.6.24-72.2, å®¢æˆ·ç«¯MySQLdb;
 
-- Êı¾İ¿â MySQL 5.6.24-72.2, MySQLdb;
-
-- »º´æ²ã Redis 3.0.3£¬ Redis Python ¿Í»§¶Ë [redis-py](https://github.com/andymccurdy/redis-py);
+- ç¼“å­˜å±‚ Redis 3.0.3ï¼Œå®¢æˆ·ç«¯[redis-py](https://github.com/andymccurdy/redis-py);
 
 

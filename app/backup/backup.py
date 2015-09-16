@@ -8,6 +8,45 @@ import sys
 sys.path.append("..")
 from config import AppConfig
 from db_connect.MySQL_lightweight import MySQL_lightweight
+from cmdb.cmdb_api_base import CmdbApiBase
+
+class BackupList(CmdbApiBase):
+    def mha(self):
+        result = self.__call_interface__('BACKUP','backup_info/Mysql_Cluster',json_obj=None)
+        return result
+
+    def mongo(self):
+        result = self.__call_interface__('BACKUP','backup_info/Mongo_Cluster',json_obj=None)
+        return result
+
+    def single_instance(self):
+        result = self.__call_interface__('BACKUP','backup_info/Single',json_obj=None)
+        return result
+
+    def configure(self):
+        result = self.__call_interface__('BACKUP','get_config',json_obj=None)
+        return result
+
+    def history(self,data):
+        result = self.__call_interface__('BACKUP','backup_history',json_obj=data)
+        return result
+
+    def email_backup_report(self):
+        result = self.__call_interface__('BACKUP','report',json_obj=None)
+        return result
+
+    def add_backup(self,data):
+        result = self.__call_interface__('BACKUP','addbackup',json_obj=data)
+        return result
+
+    def del_backup(self,data):
+        result = self.__call_interface__('BACKUP','delbackup',json_obj=data)
+        return result
+
+    def switch_flag(self,data):
+        result = self.__call_interface__('BACKUP','switch_flag',json_obj=data)
+        return result
+
 
 def is_valid_date(str_in):
     '''Test if it is a valid string of date.'''
@@ -20,18 +59,17 @@ def is_valid_date(str_in):
 class FileBackup(object):
     _file_backup_db = 'DbBak'
     _db = None
-    
+
     def __init__(self):
-        dbconfig = {'host':backup_config.BACKUP_INFO_DB_IP, 
-                    'port':backup_config.BACKUP_INFO_DB_PORT, 
-                    'user':AppConfig.MYSQL_ADMIN_USR, 
-                    'passwd':AppConfig.MYSQL_ADMIN_PSWORD, 
-                    'db':self._file_backup_db, 
+        dbconfig = {'host':backup_config.BACKUP_INFO_DB_IP,
+                    'port':backup_config.BACKUP_INFO_DB_PORT,
+                    'user':AppConfig.MYSQL_ADMIN_USR,
+                    'passwd':AppConfig.MYSQL_ADMIN_PSWORD,
+                    'db':self._file_backup_db,
                     'charset':'utf8'}
         self._db = MySQL_lightweight(dbconfig)
 
-    def get_file_backup_info_from_db(self, st_date=time.strftime("%Y-%m-%d",time.localtime(time.time()-24*60*60)), 
-                             en_date=time.strftime('%Y-%m-%d',time.localtime(time.time()))):
+    def get_file_backup_info_from_db(self, st_date=time.strftime("%Y-%m-%d",time.localtime(time.time()-24*60*60)), en_date=time.strftime('%Y-%m-%d',time.localtime(time.time()))):
         if not (is_valid_date(st_date) and is_valid_date(en_date)):
             raise Exception('It is not a valid date.')
         sql = "SELECT name,file_name,file_size,bak_keep_host FROM file_backup WHERE TIME >= '%s' AND TIME < '%s' order by name" % (st_date, en_date)
@@ -44,7 +82,7 @@ class FileBackup(object):
                              en_date=time.strftime('%Y-%m-%d',time.localtime(time.time()))):
         if not (is_valid_date(st_date) and is_valid_date(en_date)):
             raise Exception('It is not a valid date.')
-        
+
         result = {
             'total': 0,
             'success': 0,

@@ -11,14 +11,13 @@ from cmdb.instance import InstanceList
 from cmdb.server_info_form import ServerInfoForm, ServerInitForm, InstanceInfoForm, StandbyServerInfoForm, ApplyServerForm, InstallDbForm, BackupForm
 from config import AppConfig
 from cmdb.cmdb_api_base import CmdbApiCallException
-from cmdb.backup import BackupList
 from cmdb.cluster import Cluster
 
 from cas_urls import create_cas_login_url
 from cas_urls import create_cas_logout_url
 from cas_urls import create_cas_validate_url
 
-from backup.backup import FileBackup
+from backup.backup import FileBackup, BackupList
 from monitor.monitor import Monitor
 
 from redispy.redispy import DBAPortalRedis
