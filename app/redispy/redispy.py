@@ -11,7 +11,7 @@ from config import AppConfig
 
 from cmdb.server import ServerList
 from cmdb.instance import InstanceList
-from cmdb.backup import BackupList
+from backup.backup import BackupList
 
 class DBAPortalRedis(object):
     _redis = None
