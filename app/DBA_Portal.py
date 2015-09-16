@@ -61,7 +61,7 @@ def add_authority_parameters(query_condition=None):
     Description: all click button operation need to have authority parameters. This function add authority parameters to query_condition.
     Parameters format:
     ### query_condition: {key1:value1,key2:,value2}
-    Example: 
+    Example:
     ### query_condition = add_authority_parameters({'ip':'10.1.1.192','port':'3306')}
     ### query_condition is {'ip':'10.1.1.192','port':'3306','code':app.config['USER_CODE'],...}
     """
@@ -84,7 +84,7 @@ def get_parameters_from_url(request_url=request,query_key=None):
     Description: get parameters from url.
     Parameters format:
     ### query_key: [key1,key2,key3]
-    Example: 
+    Example:
     ### url: http://portal.dba.dp/standbylist?cpu=16&ram_size=24GB
     ### ret_val = get_parameters_from_url(['idc','cpu','ram_size'])
     ### ret_val is {'cpu':'16','ram_size':'24GB'}
@@ -155,7 +155,7 @@ def is_recently_time(input_time, days=1):
     now = datetime.datetime.now()
     recently_time = now - datetime.timedelta(days=days)
     return True if recently_time < input_time else False
-        
+
 def byte2humanread(byte):
     """
     Description: translate byte into human read size(MB,GB,TB)
@@ -300,7 +300,7 @@ def fill_standby_server_info_form(server_form=None, idc='', cpu='', ram_size='')
     server_form.ram_size.data = ram_size
 
     return server_form
-    
+
 def fill_inst_info_form(server_form=None, type='', status='', dba_owner='', cluster_name=''):
     instance_list = InstanceList()
 
@@ -381,7 +381,7 @@ def operate_server(operate_type=None,server_id=None):
 def server_info(server_id=None):
     if not have_accessed():
         return redirect(url_for('login'))
- 
+
     try:
         data = dict({'page_data': dict()})
         server_list = ServerList()
@@ -392,7 +392,7 @@ def server_info(server_id=None):
         if not query_result:
             machine_info = dict()
             query_result = server_list.info_by_id(server_id)
-            
+
         if len(query_result) > 0:
             machine_info = query_result[0]
             data['page_data']['machine_info'] = machine_info
@@ -415,7 +415,7 @@ def server_info(server_id=None):
 def init_system(server_id=None):
     if not have_accessed():
         return redirect(url_for('login'))
-    
+
     try:
         if request.method == 'POST':
             supported_query_key = ['server_id', 'server_ip', 'mirror', 'comment']
@@ -499,15 +499,14 @@ def standby_list():
         supported_query_key = ['idc', 'cpu', 'ram_size']
         query_condition = get_parameters_from_url(request,supported_query_key)
 
-        dba_portal_redis = DBAPortalRedis()
-        server_available = dba_portal_redis.get_server_available() if dba_portal_redis._redis.exists('server_available') else ''
-
+        #dba_portal_redis = DBAPortalRedis()
+        #server_available = dba_portal_redis.get_json('server_available')
         server_list = ServerList()
+        server_available = None
         if not server_available:
             server_available = server_list.list_available()
-            dba_portal_redis.set_json_with_expire('server_available', server_available, dba_portal_redis._expire_server_available)
+            #dba_portal_redis.set_json_with_expire('server_available', server_available, dba_portal_redis._expire_server_available)
 
-        #page_data = server_list.list_available(data=query_condition)
         page_data = server_available
         filter_form = StandbyServerInfoForm()
         filter_form = fill_standby_server_info_form(server_form=filter_form, **query_condition)
@@ -541,16 +540,16 @@ def server_list():
     try:
         supported_query_key = ['ram_size', 'idc', 'logic_cpu_count']
         query_condition = get_parameters_from_url(request,supported_query_key)
-        
+
         dba_portal_redis = DBAPortalRedis()
         server_list = ServerList()
-        server_all = dba_portal_redis.get_server_all() if dba_portal_redis._redis.exists('server_all') else ''
+        server_all = dba_portal_redis.get_json('server_all')
         if not server_all:
             server_all = server_list.list_all()
             dba_portal_redis.set_json_with_expire('server_all', server_all, dba_portal_redis._expire_server_all)
 
         instance_list = InstanceList()
-        instance_all = dba_portal_redis.get_instance_all() if dba_portal_redis._redis.exists('instance_all') else ''
+        instance_all = dba_portal_redis.get_json('instance_all')
         if not instance_all:
             instance_all = instance_list.list_all()
             dba_portal_redis.set_json_with_expire('instance_all', instance_all, dba_portal_redis._expire_instance_all)
@@ -647,7 +646,7 @@ def applyserver():
         data['form'] = filter_form
         data['comment'] = comment
         return render_template('applyserver.html', data=data)
-    except CmdbApiCallException, e:        
+    except CmdbApiCallException, e:
         app.logger.error(str(e))
         flash(e.detail_msg(), 'danger')
         return render_template('blank.html')
@@ -803,7 +802,7 @@ def add_server():
         else:
             page_data = ''
             data['form_data'] = dict()
-	
+
         data['page_name'] = 'Add Server'
         data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
         data['form'] = server_form
@@ -825,18 +824,18 @@ def get_product(bu):
         return redirect(url_for('login'))
 
     try:
-        dba_portal_redis = DBAPortalRedis()
-        key = 'product_bu_' + str(hash(bu))
+        #dba_portal_redis = DBAPortalRedis()
+        #key = 'product_bu_' + str(hash(bu))
         #product_bu = dba_portal_redis.get_product_bu(key) if dba_portal_redis._redis.exists(key) else ''
         product_bu = ''
-                
+
         if not product_bu:
             product_bu = []
             url = "http://api.cmdb.dp/api/v0.1/bu/"+bu+"/products"
             rep = requests.get(url).json()
             for re in rep['products']:
                 product_bu += [re['product_name']]
-            dba_portal_redis.set_json_with_expire(key, product_bu, 3600*24)
+            #dba_portal_redis.set_json_with_expire(key, product_bu, 3600*24)
             product_bu = json.dumps(product_bu)
         return product_bu
     except Exception,e:
@@ -990,7 +989,7 @@ def operate_instance(operate_type=None):
     if not have_accessed():
         return redirect(url_for('login'))
 
-    try:    
+    try:
         if not operate_type:
             flash('请选择操作类型', 'danger')
             return redirect(url_for('instance_list'))
@@ -1031,7 +1030,7 @@ def schema_list():
     try:
         message_list = ({'from': 'admin', 'time': '2013-01-01', 'content': 'This is a test message'},)
         task_list = ({'name': 'task 1', 'progress': 10},)
-        
+
         data = dict()
         data['message_list'] = message_list
         data['task_list'] = task_list
@@ -1090,7 +1089,7 @@ def test():
 
 def sort_cluster_by_backup_status(clusters):
     if not clusters:
-        return None 
+        return None
     sorted_cluster = {}
     nonbackup = {}
     warningbackup = {}
@@ -1174,7 +1173,7 @@ def set_backup_config():
         supported_query_key = ['id','ip','time','port']
         query_condition = dict()
         query_condition = get_parameters_from_url(request,supported_query_key)
-        
+
 # query_condition = add_authority_parameters(query_condition)
 
         # if not query_condition['ip'] or not query_condition['port']:
@@ -1250,28 +1249,18 @@ def backup_center():
 #        return redirect(url_for('login'))
     try:
         backup_list = BackupList()
-        dba_portal_redis = DBAPortalRedis()
+        #dba_portal_redis = DBAPortalRedis()
+        #backup_mha = dba_portal_redis.get_json('backup_mha')
+        #backup_single_instance = dba_portal_redis.get_json('backup_single_instance')
+        #backup_configure = dba_portal_redis.get_json('backup_configure')
+        #backup_mongo = dba_portal_redis.get_json('backup_mongo')
+        #backup_history_bu = dba_portal_redis.get_json('backup_history_bu')
 
-        backup_mha = dba_portal_redis.get_backup_mha() if dba_portal_redis._redis.exists('backup_mha') else ''
-        backup_single_instance = dba_portal_redis.get_backup_single_instance() if dba_portal_redis._redis.exists('backup_single_instance') else ''
-        backup_configure = dba_portal_redis.get_backup_configure() if dba_portal_redis._redis.exists('backup_configure') else ''
-        backup_mongo = dba_portal_redis.get_backup_mongo() if dba_portal_redis._redis.exists('backup_mongo') else ''
-        backup_history_bu = dba_portal_redis.get_backup_history_bu() if dba_portal_redis._redis.exists('backup_history_bu') else ''
-
-        if not backup_mha:
-            backup_mha = backup_list.mha()
-            #dba_portal_redis.set_backup_mha(backup_mha)
-        if not backup_mongo:
-            backup_mongo = backup_list.mongo()
-        if not backup_single_instance:
-            backup_single_instance = backup_list.single_instance()
-            #dba_portal_redis.set_backup_single_instance(backup_single_instance)
-        if not backup_configure:
-            backup_configure = backup_list.configure()
-            #dba_portal_redis.set_backup_configure(backup_configure)
-        if not backup_history_bu:
-            backup_history_bu = backup_list.history({"buss":"tgtp","dbtype":"mysql"})
-            #dba_portal_redis.set_backup_configure(backup_configure)
+        backup_mha = backup_list.mha()
+        backup_mongo = backup_list.mongo()
+        backup_single_instance = backup_list.single_instance()
+        backup_configure = backup_list.configure()
+        backup_history_bu = backup_list.history({"buss":"tgtp","dbtype":"mysql"})
 
         mha = sort_cluster_by_backup_status(backup_mha['mha'])
         mongo = sort_cluster_by_backup_status(backup_mongo['mongo'])
@@ -1282,7 +1271,6 @@ def backup_center():
         data['nonbackup']="尚未备份"
         data['warningbackup']="警告备份"
         data['goodbackup']="成功备份"
-#        return render_template('blank.html')
         return render_template('backup_center.html', data=data, backup_configure=backup_configure, backup_single_instance=backup_single_instance)
     except Exception,e:
         app.logger.error(str(e))
@@ -1312,7 +1300,7 @@ def email_backup_format(result, which_page):
                             if not tmp_failed.has_key(bu):
                                 tmp_failed[bu] = {}
                             tmp_failed[bu][cluster_name] = cluster_info['info'][bu][cluster_name]
-                            
+
             for key in tmp_failed:
                 tmp = {key:tmp_failed[key]}
                 info_sorted[cluster_type].append(tmp)
@@ -1346,11 +1334,11 @@ def backup_report():
         active = request.values.get('active','MySQL')
 
         dba_portal_redis = DBAPortalRedis()
-        backup_email_backup_report = dba_portal_redis.get_backup_email_backup_report() if dba_portal_redis._redis.exists('backup_email_backup_report') else ''
+        backup_email_backup_report = dba_portal_redis.get_json('backup_email_backup_report')
         backup_list = BackupList()
         if not backup_email_backup_report:
             backup_email_backup_report = backup_list.email_backup_report()
-            dba_portal_redis.set_backup_email_backup_report(backup_email_backup_report)
+            dba_portal_redis.set_json_with_expire('backup_email_backup_report',backup_email_backup_report,3600*6)
 
         result = backup_email_backup_report
         file_backup = FileBackup()
@@ -1400,7 +1388,7 @@ def del_backup():
     if not have_accessed():
         return redirect(url_for('login'))
 
-    try:    
+    try:
         supported_query_key = ['id','ip','port']
         query_condition = get_parameters_from_url(request,supported_query_key)
         query_condition = add_authority_parameters(query_condition)
@@ -1472,7 +1460,7 @@ def switch_flag():
     if not have_accessed():
         return redirect(url_for('login'))
 
-    try:    
+    try:
         supported_query_key = ['id','ip','time','port']
         query_condition = dict()
         query_condition = get_parameters_from_url(request,supported_query_key)
@@ -1501,7 +1489,7 @@ def migration_center():
     try:
         message_list = ({'from': 'admin', 'time': '2015-08-07', 'content': 'MySQL Recovery And Migration Tool Center '},)
         task_list = ({'name': 'task 1', 'progress': 10},)
-        
+
         data = dict({'page_name': 'MySQL Migration Center'})
         data['message_list'] = message_list
         data['task_list'] = task_list
@@ -1590,7 +1578,7 @@ def flush_cache():
     if not have_accessed():
         return redirect(url_for('login'))
 
-    try:    
+    try:
         supported_query_key = ['keys', 'page']
         query_condition = get_parameters_from_url(request,supported_query_key)
         #query_condition = add_authority_parameters(query_condition)
@@ -1671,13 +1659,13 @@ def login():
             current_app.config['CAS_LOGIN_ROUTE'],
             flask.url_for('login', _external=True),
             )
-        
+
         if 'ticket' in flask.request.args:
             flask.session[cas_token_session_key] = flask.request.args['ticket']
         if cas_token_session_key in flask.session:
             if validate(flask.session[cas_token_session_key]):
                 redirect_url = current_app.config['CAS_AFTER_LOGIN']
-                all_servers = ServerList()            
+                all_servers = ServerList()
                 privilege = all_servers.list_user_privilege(real_name=flask.session['CAS_NAME'],domain_name=flask.session['CAS_USERNAME'])
                 flask.session['USER_PRIV'] = privilege
             else:
@@ -1733,7 +1721,7 @@ def validate(ticket):
             flask.url_for('login', _external=True),
             ticket)
         current_app.logger.debug("Making GET request to {0}".format(cas_validate_url))
-        
+
         response = urlopen(cas_validate_url).read()
         ticketid = _parse_tag(response, "cas:user")
         strs = [s.strip() for s in ticketid.split('|') if s.strip()]
@@ -1816,17 +1804,15 @@ def dashboard():
         data['task_list'] = task_list
         data['page_name'] = 'Dash Board'
         data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
-        
-        dba_portal_redis = DBAPortalRedis()
-        server_total_count = dba_portal_redis.get_server_total_count() if dba_portal_redis._redis.exists('server_total_count') else ''
-        instance_total_count = dba_portal_redis.get_instance_total_count() if dba_portal_redis._redis.exists('instance_total_count') else ''
 
+        dba_portal_redis = DBAPortalRedis()
+        server_total_count = dba_portal_redis.get_json('server_total_count')
+        instance_total_count = dba_portal_redis.get_json('instance_total_count')
         server_list = ServerList()
         instance_list = InstanceList()
         if not server_total_count:
             server_total_count = server_list.get_total_count()
             dba_portal_redis.set_json_with_expire('server_total_count', server_total_count, dba_portal_redis._expire_server_total_count)
-
         if not instance_total_count:
             instance_total_count = instance_list.get_total_count()
             dba_portal_redis.set_json_with_expire('instance_total_count', instance_total_count, dba_portal_redis._expire_instance_total_count)
@@ -1850,4 +1836,4 @@ if __name__ == "__main__":
     dba_portal_redis = DBAPortalRedis()
     #dba_portal_redis.reset_dba_portal_redis()
     app.jinja_env.cache = None
-    app.run(host='0.0.0.0', port=AppConfig.PORTAL_PORT)
+    app.run(host='0.0.0.0', port=AppConfig.PORTAL_PORT, threaded=True)
