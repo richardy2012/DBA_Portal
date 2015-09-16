@@ -255,7 +255,7 @@ class ServerList(CmdbApiBase):
         elif db_type == "mongodb":
             ports = [27017,27018,27019,27117,27118,27119]
         elif db_type == "memcache":
-            ports = [11211,11221]
+            ports = [11211,11212,11213,11214,11215,11216,11217,11218,11219,11220,11221]
         
         for i in instance:
             if i["port"] in ports and i['status'] != u'未初始化':
