@@ -445,7 +445,7 @@ class Monitor():
         pass
 #print monitor_config.MONITOR_IPS
         #self._monitor_ip_lists = self.parse_ips(monitor_config.MONITOR_IPS)
-    
+
     def parse_ips(self, ip_str):
         ip_lists = []
         if not ip_str:
@@ -473,7 +473,7 @@ class Monitor():
             print 'monitor -- parameters error: it is not cat_datas'
             return False
 
-        xy = self.parse_cat_point_lists(data['datas'])        
+        xy = self.parse_cat_point_lists(data['datas'])
         #today = time.strftime('%Y-%m-%d',time.localtime(time.time()))
         hc = {
             "chart": {"type": "line"},
@@ -507,7 +507,7 @@ class Monitor():
         if not (data and data['product'] and data['type']):
             print 'monitor -- parameters error: do not have product or type'
             return False
-        
+
         hcs = []
         dba_portal_redis = DBAPortalRedis()
         data['product'] = self._monitor_ip_lists
@@ -542,7 +542,7 @@ class Monitor():
         if not (data and data['product'] and data['type']):
             print 'monitor -- parameters error: do not have product or type'
             return False
-        
+
         hcs = []
         dba_portal_redis = DBAPortalRedis()
         if data['monitor_range'] == 'all1':
@@ -565,7 +565,7 @@ class Monitor():
             for key1 in monitor_all:
                 for lineChart in monitor_all[key1]:
                     if lineChart['id'] == monitor_id:
-                        hc = lineChart            
+                        hc = lineChart
             hc_title = self._mha_dict[monitor_ip] + "-" + monitor_ip + ""
             hc = self.cat2hc(hc, hc_title)
             hcs.append(hc)
@@ -638,7 +638,7 @@ class Monitor():
                 max_point["max"] = str(float(value)/1000) + 'K'
         return max_point
 
-def usage():  
+def usage():
     print "Usage:\tpython %s --type=[questions|tps] --date=2015091310 --range=2 --ip=10.1.125.14\n" % sys.argv[0]
     print "type:\tmonitor type that cat system supported."
     print "\tdefault: questions"
@@ -649,12 +649,12 @@ def usage():
     print "ip:\tip of mysql instance to be analyzed."
     print "\tdefault: all important mysql ips in 917\n"
     #print "Usage: python %s -t [questions|tps] -d 2015091710 -t 2 -i 10.1.125.14" % sys.argv[0]
-  
-  
+
+
 if __name__ == '__main__':
-    try:  
+    try:
         opts,args = getopt.getopt(sys.argv[1:], "ht:d:r:i:", ["help=","type=", "date=","range=","ip="])
-      
+
         if len(sys.argv) < 2:
             usage()
             sys.exit(1)
@@ -662,7 +662,7 @@ if __name__ == '__main__':
         #check all param
         data = {}
         ip_list = ''
-        for opt,arg in opts:  
+        for opt,arg in opts:
             if opt in ("-h", "--help") or opt not in ("-t", "--type", "-d", "--date", "-r", "--range", "-i", "--ip"):
                 usage()
                 sys.exit(1)
@@ -686,11 +686,11 @@ if __name__ == '__main__':
         for instance in sorted(result.keys()):
             print "%s\t%s\t%s\t%s" % (result[instance]['cluster'], result[instance]['ip'], result[instance]['time'], result[instance]['max'])
 
-          
-    except getopt.GetoptError:  
-        print("getopt error!");  
-        usage();  
-        sys.exit(1);  
+
+    except getopt.GetoptError:
+        print("getopt error!");
+        usage();
+        sys.exit(1);
 
 
 #    for timeRange in (1,2,6,12,24):
