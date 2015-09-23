@@ -15,6 +15,16 @@
       {% endif %}
       {% endfor %}
     </select>
+    指标:
+    <select name="mtype_range" form="monitor_form">
+      {% for mtype_range in data['mtype_range_list'] %}
+      {% if mtype_range == data['mtype_range'] %}
+      <option value="{{ mtype_range }}" selected>{{ mtype_range }}</option>
+      {% else %}
+      <option value="{{ mtype_range }}">{{ mtype_range }}</option>
+      {% endif %}
+      {% endfor %}
+    </select>
     实例:
     <input type="text" name="instance" value="{{ data['instance'] }}"/>
     <input type="submit" value="查找">
