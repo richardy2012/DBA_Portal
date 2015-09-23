@@ -4,16 +4,12 @@
 {% block page_wrapper %}
 
 <script>
-
 </script>
 
 
 <!-- cluster detail-->
 <div class="row">
   <div class="col-lg-12">
-    <div class="panel panel-info">
-    </div>
-    <b>备份详细信息</b>
     <ul class="nav nav-tabs" id="myTab">
       <li class="active"><a href="#MHA">MHA</a></li>
       <!-- <li ><a href="#MMM">MMM</a></li> -->
@@ -163,11 +159,10 @@
 {{ super() }}
 <script>
   $(function () {
-  $('#myTab a:first').tab('show');//初始化显示哪个tab
-
-  $('#myTab a').click(function (e) {
-  $(this).tab('show');//显示当前选中的链接及关联的content
-  })
+    $('#myTab a:first').tab('show');//初始化显示哪个tab
+    $('#myTab a').click(function (e) {
+      $(this).tab('show');//显示当前选中的链接及关联的content
+    })
   })
 </script>
 {% endblock %}

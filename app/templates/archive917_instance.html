@@ -1,0 +1,52 @@
+{% extends 'frame.html' %}
+{% set level1_name='monitor' %}
+{% set level2_name='archive917_dashboard' %}
+{% block page_wrapper %}
+
+<div id="monitor_instance_title">
+  <form action="archive917_instance" id="monitor_form">
+    日期:
+    <select name="date" form="monitor_form">
+      {% for date in data['date_list'] %}
+      {% if date == data['date'] %}
+      <option value="{{ date }}" selected>{{ date }}</option>
+      {% else %}
+      <option value="{{ date }}">{{ date }}</option>
+      {% endif %}
+      {% endfor %}
+    </select>
+    实例:
+    <input type="text" name="instance" value="{{ data['instance']}}"/>
+    <input type="submit" value="查找">
+  </form>
+</div>
+
+<div id="monitor_instance_plot">
+  {% for mtype in data["mtype_list"] %}
+  <div style="float:left;">
+    <div id="container_{{mtype}}" style="width:400px;height:250px"></div>
+  </div>
+  {% endfor %}
+</div>
+<input id="hc_configs" value="{{ hc_configs }}" hidden="hidden">
+
+
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+<script>
+ $(function () {
+   hc_tmp = $('#hc_configs').val()
+   hc_configs = JSON.parse(hc_tmp)
+
+   for (x in hc_configs) {
+     container = '#container_'+x.toString()
+     $(container).highcharts(
+       hc_configs[x]
+     );
+   }
+ })
+
+</script>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends 'frame.html' %}
+{%  set level1_name='monitor' %}
+{%  set level2_name='archive917_dashboard' %}
+{% block page_wrapper %}
+
+<script>
+</script>
+
+
+<!-- cluster detail-->
+<div class="row">
+  <div class="col-lg-12">
+
+    <form action="archive917_dashboard" id="monitor_form">
+      日期:
+      <select name="date" form="monitor_form">
+        {% for date in data['date_list'] %}
+        {% if date == data['date'] %}
+        <option value="{{ date }}" selected>{{ date }}</option>
+        {% else %}
+        <option value="{{ date }}">{{ date }}</option>
+        {% endif %}
+        {% endfor %}
+      </select>
+      监控类型:
+      <select name="monitor_type" form="monitor_form">
+        {% for mtype in data['monitor_type_list'] %}
+        {% if mtype == data['monitor_type'] %}
+        <option value="{{ mtype }}" selected>{{ mtype }}</option>
+        {% else %}
+        <option value="{{ mtype }}">{{ mtype }}</option>
+        {% endif %}
+        {% endfor %}
+      </select>
+      <input type="submit" value="查找">
+    </form>
+
+    <table class="table table-bordered table-hover" id="mh">
+      <thead>
+	<tr><th>集群名</th><th>IP</th><th>最高峰</th></tr>
+      </thead>
+      <tbody>
+	{%  if data['page_data']  %}
+        {% for row in  data['page_data'] %}
+	<tr>
+	  <td>{% if row['GroupName'] %}{{ row['GroupName'] }}{% endif %}</td>
+	  <td>
+            {% if row['IP'] %}
+	    <a type="button" class="btn btn-info" href="{{ url_for('archive917_instance') }}?instance={{row['IP']}}&date={{ data["date"] }}">{{ row['IP'] }}</a>
+            {% endif %}
+          </td>
+          {% if row['max_value'] and row['max_value'] > 30000 %}
+          <td style="color:red"><b>{{ row['max_show'] }}</b>
+            {% else %}
+          <td>
+            {% if row['max_show'] %}{{ row['max_show'] }}{% endif %}
+            {% endif %}
+          </td>
+	</tr>
+        {% endfor %}
+	{% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+{% endblock %}
+{% block script %}
+{{ super() }}
+<script>
+</script>
+{% endblock %}

@@ -19,6 +19,7 @@ from cas_urls import create_cas_validate_url
 
 from backup.backup import FileBackup, BackupList
 from monitor.monitor import Monitor
+from monitor.archive917 import MonitorArchive
 
 from redispy.redispy import DBAPortalRedis
 
@@ -196,7 +197,7 @@ def ignore_overflow_buss(buss):
         return busses[0] + '...'
     return busses[0]
 
-def check_date(date):
+def check_date(self,date):
     """
     Description: check date if it is a formatted date
     Parameters:
@@ -205,12 +206,14 @@ def check_date(date):
     ### check_date('2000-03-03')
     ### return True
     """
-    if date is None or type(date) is not str:
+    print type(date)
+    print date
+    if not (date and (type(date) is str or type(date) is unicode)):
+        print 'check_date -- parameters error'
         return False
+    date = date.encode("utf-8") if type(date) is unicode else date
     match = re.match(r'^(\d{4})-(\d{2})-(\d{2})$', date)
-    if match:
-        return True
-    return False
+    return True if match else False
 
 ###################################
 # form function part
@@ -1527,50 +1530,126 @@ def slowlog():
         flash(msg, 'danger')
         return render_template('blank.html')
 
-@app.route("/query_monitor",methods=['POST','GET'])
-def query_monitor():
+###################################
+# function in monitor module
+###################################
+@app.route("/archive917_dashboard",methods=['POST','GET'])
+def archive917_dashboard():
 #    if not have_accessed():
 #        return redirect(url_for('login'))
     try:
-        supported_query_key = ['type', 'timeRange', 'monitor_range', 'date']
+        supported_query_key = ['date','monitor_type']
         query_condition = get_parameters_from_url(request,supported_query_key)
-        monitor_type = query_condition['type'] if query_condition.has_key('type') else ''
-        print query_condition
-        if not monitor_type:
-            monitor_type = "questions"
-        query_condition['type'] = monitor_type
-
-        product_list = []
-        not_in_cat = ("10.1.110.145")
-        for ip in ("10.1.125.16"):
-            tmp_product = 'db-mysql-' + ip + '-3306'
-            product_list.append(tmp_product)
-        query_condition['product'] = product_list
-
-        monitor_list = Monitor()
-        hcs = None
-        if query_condition.has_key('monitor_range'):
-            hcs = monitor_list.monitor_all_mha(query_condition)
-        else:
-            hcs = monitor_list.monitor_subclass(query_condition)
-        hc_configs = json.dumps(hcs)
-        tmp_config= ''
-        for key in query_condition:
-            if key != 'timeRange':
-                tmp_config += (key + '=' + str(query_condition[key]) + '&')
-        data = {'page_data': hcs}
-        if query_condition.has_key('date'):
-            data['date'] = query_condition['date']
-        else:
-            data['date'] = time.strftime('%Y%m%d%H',time.localtime(time.time()))
-        data['page_name'] = "917重点监控"
-        data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
-        data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
-        return render_template('query_monitor.html', data=data, hc_configs=hc_configs, tmp_config=tmp_config)
+        monitor_type = query_condition['monitor_type'] if query_condition.has_key('monitor_type') else 'questions'
+        date = query_condition['date'] if query_condition.has_key('date') else '2015-09-17'
+        monitor_archive = MonitorArchive()
+        rows = monitor_archive.archive_dashboard(date, monitor_type)
+        data = {'page_data':rows,'date':date,'monitor_type':monitor_type}
+        data['monitor_type_list'] = ["questions","tps","io_util","iops","usr","sys","thds_run","network_out"]
+        data['date_list'] = []
+        for i in range(11,19): data['date_list'].append('2015-09-' + str(i))
+        data['page_name'] = "917核心数据库概览"
+        # data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
+        # data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
+        return render_template('archive917_dashboard.html', data=data)
     except Exception,e:
         app.logger.error(str(e))
         flash(e,'danger')
         return render_template('blank.html')
+
+@app.route("/archive917_instance",methods=['POST','GET'])
+def archive917_instance():
+#    if not have_accessed():
+#        return redirect(url_for('login'))
+    try:
+        supported_query_key = ['instance','date']
+        query_condition = get_parameters_from_url(request,supported_query_key)
+        date = query_condition['date'] if query_condition.has_key('date') else '2015-09-17'
+        instance = query_condition['instance'] if query_condition.has_key('instance') else '10.1.125.14'
+        monitor_archive = MonitorArchive()
+        hcs = monitor_archive.archive_instance(instance, date)
+        hcs = json.dumps(hcs)
+        mtype_list = monitor_archive.get_mtype_list()
+        #        data = {'mtype_list':mtype_list,'date':date,'instance':instance}
+        data = {'mtype_list':["questions","tps","io_util","iops","usr","sys","thds_run","network_out"]}
+        data['date_list'] = []
+        for i in range(11,19): data['date_list'].append('2015-09-' + str(i))
+        data['page_name'] = "917核心数据库详细"
+        # data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
+        # data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
+        #return render_template('blank.html')
+        return render_template('archive917_instance.html', data=data, hc_configs=hcs)
+    except Exception,e:
+        app.logger.error(str(e))
+        flash(e,'danger')
+        return render_template('blank.html')
+
+@app.route("/rtm_dashboard",methods=['POST','GET'])
+def rtm_dashboard():
+#    if not have_accessed():
+#        return redirect(url_for('login'))
+    try:
+        return render_template('rtm_dashboard.html')
+    except Exception,e:
+        app.logger.error(str(e))
+        flash(e,'danger')
+        return render_template('blank.html')
+
+@app.route("/rtm_optional",methods=['POST','GET'])
+def rtm_optional():
+#    if not have_accessed():
+#        return redirect(url_for('login'))
+    try:
+        return render_template('rtm_optional.html')
+    except Exception,e:
+        app.logger.error(str(e))
+        flash(e,'danger')
+        return render_template('blank.html')
+
+# @app.route("/query_monitor",methods=['POST','GET'])
+# def query_monitor():
+# #    if not have_accessed():
+# #        return redirect(url_for('login'))
+#     try:
+#         supported_query_key = ['type', 'timeRange', 'monitor_range', 'date']
+#         query_condition = get_parameters_from_url(request,supported_query_key)
+#         monitor_type = query_condition['type'] if query_condition.has_key('type') else ''
+#         print query_condition
+#         if not monitor_type:
+#             monitor_type = "questions"
+#         query_condition['type'] = monitor_type
+
+#         product_list = []
+#         not_in_cat = ("10.1.110.145")
+#         for ip in ("10.1.125.16"):
+#             tmp_product = 'db-mysql-' + ip + '-3306'
+#             product_list.append(tmp_product)
+#         query_condition['product'] = product_list
+
+#         monitor_list = Monitor()
+#         hcs = None
+#         if query_condition.has_key('monitor_range'):
+#             hcs = monitor_list.monitor_all_mha(query_condition)
+#         else:
+#             hcs = monitor_list.monitor_subclass(query_condition)
+#         hc_configs = json.dumps(hcs)
+#         tmp_config= ''
+#         for key in query_condition:
+#             if key != 'timeRange':
+#                 tmp_config += (key + '=' + str(query_condition[key]) + '&')
+#         data = {'page_data': hcs}
+#         if query_condition.has_key('date'):
+#             data['date'] = query_condition['date']
+#         else:
+#             data['date'] = time.strftime('%Y%m%d%H',time.localtime(time.time()))
+#         data['page_name'] = "917重点监控"
+#         data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
+#         data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
+#         return render_template('query_monitor.html', data=data, hc_configs=hc_configs, tmp_config=tmp_config)
+#     except Exception,e:
+#         app.logger.error(str(e))
+#         flash(e,'danger')
+#         return render_template('blank.html')
 
 @app.route("/flush_cache",methods=['POST','GET'])
 def flush_cache():

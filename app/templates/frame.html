@@ -7,17 +7,19 @@ set side_bar_tree = {
 1:{'func_name':'server_list', 'show_name':'服务器管理', 'next_level':{}},
 2:{'func_name':'instance_list', 'show_name':'DB实例管理', 'next_level':{}},
 3:{'func_name':'cluster_list', 'show_name':'DB集群管理', 'next_level':{}},
-4:{'func_name':'schema_list', 'show_name':'Schema List', 'next_level':{}}
+4:{'func_name':'schema_list', 'show_name':'Schema List(To do)', 'next_level':{}}
 } },
 2:{ 'func_name':'backup','show_name':'备份管理','icon':'fa-bar-chart-o','next_level':{
 0:{'func_name':'backup_report', 'show_name':'数据库备份日报', 'next_level':{}},
 1:{'func_name':'backup_center', 'show_name':'备份中心', 'next_level':{}},
-2:{'func_name':'migration_center', 'show_name':'迁移中心', 'next_level':{}}
+2:{'func_name':'migration_center', 'show_name':'迁移中心(开发中)', 'next_level':{}}
 } },
 3:{ 'func_name':'monitor','show_name':'监控相关','icon':'fa-dashboard','next_level':{
-0:{'func_name':'query_monitor', 'show_name':'917重点监控', 'next_level':{}},
-1:{'func_name':'metrics', 'show_name':'Metrics', 'next_level':{}},
-2:{'func_name':'slowlog', 'show_name':'慢查询', 'next_level':{}},
+0:{'func_name':'rtm_dashboard', 'show_name':'大盘(开发中)', 'next_level':{}},
+1:{'func_name':'rtm_optional', 'show_name':'自选(开发中)', 'next_level':{}},
+2:{'func_name':'archive917_dashboard', 'show_name':'917回顾', 'next_level':{}},
+3:{'func_name':'metrics', 'show_name':'Metrics(To do)', 'next_level':{}},
+4:{'func_name':'slowlog', 'show_name':'慢查询(To do)', 'next_level':{}},
 } },
 }
 %}
@@ -128,17 +130,17 @@ set side_bar_tree = {
     <div class="navbar-default sidebar" role="navigation">
       <div class="sidebar-nav navbar-collapse">
         <ul class="nav" id="side-menu">
-          <li class="sidebar-search">
-            <div class="input-group custom-search-form">
-              <input type="text" class="form-control" placeholder="Search...">
-              <span class="input-group-btn">
-                <button class="btn btn-default" type="button">
-                  <i class="fa fa-search"></i>
-                </button>
-              </span>
-            </div>
-            <!-- /input-group -->
-          </li>
+          <div></div>
+          <!-- <li class="sidebar-search"> -->
+          <!--   <div class="input-group custom-search-form"> -->
+          <!--     <input type="text" class="form-control" placeholder="Search..."> -->
+          <!--     <span class="input-group-btn"> -->
+          <!--       <button class="btn btn-default" type="button"> -->
+          <!--         <i class="fa fa-search"></i> -->
+          <!--       </button> -->
+          <!--     </span> -->
+          <!--   </div> -->
+          <!-- </li> -->
           {% for idx1, level1 in side_bar_tree.iteritems() %}
           {% if level1.next_level|length > 1 %}
           {% if level1.func_name==level1_name %}

@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 __author__ = 'caodanfeng'
 import json,requests,time
-import os,sys
+import os,sys,re
 import getopt
 import monitor_config
 sys.path.append("..")
@@ -161,6 +161,89 @@ class MonitorArchive():
         print dbconfig
         self._db = MySQL_lightweight(dbconfig)
 
+
+    def get_mtype_list(self):
+        return self._monitor_type
+
+    def get_hc_para(self, date, ip, port='3306', monitor_type='questions'):
+        if not (self.check_date(date) and ip):
+            print 'get_hc_para -- parameters error'
+            return False
+        st_time = date + ' 09:00:00'
+        en_time = date + ' 11:00:00'
+        sql = "select GroupName, MTime, %s from DBMonitor_History where IP='%s' and Port='%s' and MTime>='%s' and MTime<='%s' order by MTime" % (monitor_type, ip, port, st_time, en_time)
+        print sql
+        self._db.query(sql)
+        rows = self._db.fetchAllArray();
+        for row in rows:
+            print row['MTime'], row[monitor_type]
+        return rows
+
+    def archive_dashboard(self, date, monitor_type='questions'):
+        if not (self.check_date(date)):
+            print 'archive_dashboard -- parameters error'
+            return False
+        st_time = date + ' 09:00:00'
+        en_time = date + ' 11:00:00'
+        sql = "select GroupName,IP,max(%s) as max_value from DBMonitor_History where MTime>='%s' and MTime<='%s' group by IP order by GroupName" % (monitor_type, st_time, en_time)
+        print sql
+        self._db.query(sql)
+        rows = self._db.fetchAllArray();
+        for row in rows:
+            row['max_show'] = (str(row['max_value']/1000) + 'K') if row['max_value'] else '0'
+        return rows
+
+    def archive_instance(self, ip, date):
+        if not (self.check_date(date)):
+            print 'archive_dashboard -- parameters error'
+            return False
+        st_time = date + ' 09:00:00'
+        en_time = date + ' 11:00:00'
+        mtype_list = "`,`".join(self._monitor_type)
+        #print mtype_list
+        sql = "select MTime,GroupName,IP,`%s` from DBMonitor_History where IP='%s' and MTime>='%s' and MTime<='%s' order by MTime" % (mtype_list,ip, st_time, en_time)
+        #sql = "select MTime,GroupName,IP,questions,tps from DBMonitor_History where IP='%s' and MTime>='%s' and MTime<='%s' order by MTime" % (ip, st_time, en_time)
+        print sql
+        self._db.query(sql)
+        rows = self._db.fetchAllArray();
+        hcs = {}
+        for mtype in self._monitor_type:
+            hcs[mtype] = {
+                "chart": {"type": "line"},
+                "title": {"text": mtype},
+                "xAxis": {"categories": []},
+                "yAxis": {"title": {"text": "Value/秒"}},
+                "series": [
+                    {"name": mtype,"data": []}
+                ]
+            }
+
+        for row in rows:
+            tmp_time = row["MTime"].strftime('%H:%M')
+            for mtype in self._monitor_type:
+                hcs[mtype]["xAxis"]["categories"].append(tmp_time)
+                hcs[mtype]["series"][0]["data"].append(row[mtype])
+        # for mtype in hcs:
+        #     print hcs[mtype]
+        return hcs
+
+    def check_date(self,date):
+        """
+        Description: check date if it is a formatted date
+        Parameters:
+        ### date: '2000-03-03'
+        Example:
+        ### check_date('2000-03-03')
+        ### return True
+        """
+        if not (date and (type(date) is str or type(date) is unicode)):
+            print 'check_date -- parameters error'
+            return False
+        date = date.encode("utf-8") if type(date) is unicode else date
+        match = re.match(r'^(\d{4})-(\d{2})-(\d{2})$', date)
+        return True if match else False
+
+
     def backup_917_in_cat(self, ip=None, date=None):
         if not (ip and date):
             print 'monitor -- parameters error: need ip and date'
@@ -215,7 +298,7 @@ class MonitorArchive():
                 if start_timestamp:
                     start_timestamp = int(time.mktime(time.strptime(start_timestamp,'%Y/%m/%d %H:%M'))) * 1000
                 if simple_json:
-                    for minute in range(0,60):
+                    for minute in range(0,120):
                         sentinel = start_timestamp + 60000 * minute
                         MTime = time.localtime(sentinel/1000)
                         MTime = time.strftime('%Y-%m-%d %H:%M:%S', MTime)

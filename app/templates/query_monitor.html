@@ -19,12 +19,12 @@
 	  <option value="sys">sys</option>
 	  <option value="thds_run">thds_run</option>
 	  <option value="network_out">network_out</option>
-	</select> 
+	</select>
 	<input type="submit">
       </form>
-      
-      &nbsp;&nbsp;时间段 
-      
+
+      &nbsp;&nbsp;时间段
+
       &nbsp;&nbsp;&nbsp;[<a href="{{ url_for('query_monitor') }}?{{ tmp_config }}timeRange=1">1小时</a>]
       &nbsp;&nbsp;&nbsp;[<a href="{{ url_for('query_monitor') }}?{{ tmp_config }}timeRange=2">2小时</a>]
       &nbsp;&nbsp;&nbsp;[<a href="{{ url_for('query_monitor') }}?{{ tmp_config }}timeRange=6">6小时</a>]
@@ -50,7 +50,7 @@
 {% block script %}
 {{ super() }}
 <script>
-  $(function () { 
+  $(function () {
   hc_tmp = $('#hc_configs').val()
   hc_configs = JSON.parse(hc_tmp)
 
@@ -61,6 +61,6 @@
   );
   }
   })
-  
+
 </script>
 {% endblock %}
