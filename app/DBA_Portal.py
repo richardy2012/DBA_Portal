@@ -197,7 +197,7 @@ def ignore_overflow_buss(buss):
         return busses[0] + '...'
     return busses[0]
 
-def check_date(self,date):
+def check_date(date):
     """
     Description: check date if it is a formatted date
     Parameters:
@@ -1058,7 +1058,7 @@ def cluster_list():
         data['mha']  =info['mha']
         data['page_name'] = '集群信息'
         data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
-        return render_template('clusterlist.html', data=data)
+        return render_template('cluster_list.html', data=data)
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
         app.logger.error(str(e))
@@ -1535,8 +1535,8 @@ def slowlog():
 ###################################
 @app.route("/archive917_dashboard",methods=['POST','GET'])
 def archive917_dashboard():
-#    if not have_accessed():
-#        return redirect(url_for('login'))
+    if not have_accessed():
+        return redirect(url_for('login'))
     try:
         supported_query_key = ['date','monitor_type']
         query_condition = get_parameters_from_url(request,supported_query_key)
@@ -1549,8 +1549,8 @@ def archive917_dashboard():
         data['date_list'] = []
         for i in range(11,19): data['date_list'].append('2015-09-' + str(i))
         data['page_name'] = "917核心数据库概览"
-        # data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
-        # data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
+        data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
+        data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
         return render_template('archive917_dashboard.html', data=data)
     except Exception,e:
         app.logger.error(str(e))
@@ -1559,8 +1559,8 @@ def archive917_dashboard():
 
 @app.route("/archive917_instance",methods=['POST','GET'])
 def archive917_instance():
-#    if not have_accessed():
-#        return redirect(url_for('login'))
+    if not have_accessed():
+        return redirect(url_for('login'))
     try:
         supported_query_key = ['instance','date']
         query_condition = get_parameters_from_url(request,supported_query_key)
@@ -1570,14 +1570,13 @@ def archive917_instance():
         hcs = monitor_archive.archive_instance(instance, date)
         hcs = json.dumps(hcs)
         mtype_list = monitor_archive.get_mtype_list()
-        #        data = {'mtype_list':mtype_list,'date':date,'instance':instance}
-        data = {'mtype_list':["questions","tps","io_util","iops","usr","sys","thds_run","network_out"]}
+        #data = {'mtype_list':mtype_list,'date':date,'instance':instance}
+        data = {'mtype_list':["questions","tps","io_util","iops","usr","sys","thds_run","network_out"],'date':date,'instance':instance}
         data['date_list'] = []
         for i in range(11,19): data['date_list'].append('2015-09-' + str(i))
         data['page_name'] = "917核心数据库详细"
-        # data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
-        # data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
-        #return render_template('blank.html')
+        data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
+        data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
         return render_template('archive917_instance.html', data=data, hc_configs=hcs)
     except Exception,e:
         app.logger.error(str(e))
@@ -1589,7 +1588,8 @@ def rtm_dashboard():
 #    if not have_accessed():
 #        return redirect(url_for('login'))
     try:
-        return render_template('rtm_dashboard.html')
+        return render_template('blank.html')
+        #return render_template('rtm_dashboard.html')
     except Exception,e:
         app.logger.error(str(e))
         flash(e,'danger')
@@ -1600,7 +1600,8 @@ def rtm_optional():
 #    if not have_accessed():
 #        return redirect(url_for('login'))
     try:
-        return render_template('rtm_optional.html')
+        return render_template('blank.html')
+        #return render_template('rtm_optional.html')
     except Exception,e:
         app.logger.error(str(e))
         flash(e,'danger')
