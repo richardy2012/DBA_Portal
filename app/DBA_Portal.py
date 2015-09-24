@@ -1547,7 +1547,7 @@ def archive917_dashboard():
         data = {'page_data':rows,'date':date,'monitor_type':monitor_type}
         data['monitor_type_list'] = ["questions","tps","io_util","iops","usr","sys","thds_run","network_out"]
         data['date_list'] = []
-        for i in range(11,19): data['date_list'].append('2015-09-' + str(i))
+        for i in range(10,19): data['date_list'].append('2015-09-' + str(i))
         data['page_name'] = "917核心数据库概览"
 #        data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
 #        data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
@@ -1573,7 +1573,7 @@ def archive917_instance():
         mtype_list = monitor_archive.get_mtype_list() if mtype_range == 'All' else ["questions","tps","io_util","iops","usr","sys","thds_run","network_out"]
         data = {'mtype_list':mtype_list,'date':date,'instance':instance,'mtype_range':mtype_range,'mtype_range_list':['All','Part']}
         data['date_list'] = []
-        for i in range(11,19): data['date_list'].append('2015-09-' + str(i))
+        for i in range(10,19): data['date_list'].append('2015-09-' + str(i))
         data['page_name'] = "917核心数据库详细"
 #        data['cas_name'] = flask.session['CAS_NAME'] if flask.session and flask.session['CAS_NAME'] else ''
 #        data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
