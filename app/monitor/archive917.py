@@ -190,7 +190,9 @@ class MonitorArchive():
         self._db.query(sql)
         rows = self._db.fetchAllArray();
         for row in rows:
-            row['max_show'] = (str(row['max_value']/1000) + 'K') if row['max_value'] else '0'
+            row['max_show'] = row['max_value'] if row['max_value'] else '0'
+            if monitor_type in ['questions','tps','iops']:
+                row['max_show'] = (str(row['max_value']/1000) + 'K')
         return rows
 
     def archive_instance(self, ip, date):
