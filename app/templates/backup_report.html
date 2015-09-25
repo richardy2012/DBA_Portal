@@ -6,18 +6,17 @@
 
 <script>
   function show_this_server_type(server_type) {
-  var server_types = new Array("MySQL_cluster", "MongoDB", "MySQL_single", "File_Backup");
-  for (var i=0; i< server_types.length; i++) {
-		   var server_div = document.getElementById('div_backup_' + server_types[i]);
-		   if (server_type == server_types[i]) {
-		   server_div.style.display="";
-		   }
-		   else {
-		   server_div.style.display="none";
-		   }
-		   }
-		   }
-		   </script>
+    var server_types = new Array("MySQL_cluster", "MongoDB", "MySQL_single", "File_Backup");
+    for (var i=0; i< server_types.length; i++) {
+      var server_div = document.getElementById('div_backup_' + server_types[i]);
+      if (server_type == server_types[i]) {
+	server_div.style.display="";      }
+      else {
+	server_div.style.display="none";
+      }
+    }
+  }
+		     </script>
 
 <!-- this is the main content section to be overwritten -->
 <!-- <div class="form-group" id="backup_date"> -->
@@ -82,22 +81,18 @@
                     <td style="{{style_backup_summary_table_td}} color:green;">{{ table_data["success"] }}</td>
                     <td style="{{style_backup_summary_table_td}} color:red;font-weight:bold;">{{ table_data["failed"] }}</td>
 		    <td style="{{style_backup_summary_table_td}} color:blue;">{{ table_data["noback"] }}</td>
-                    <td style="{{style_backup_summary_table_td}}">{{ table_data["bak_server"] }}...</td>
+                    <td style="{{style_backup_summary_table_td}}">{{ table_data["bak_servers"] }}...</td>
 		    <td style="{{style_backup_summary_table_td}}">{{ table_data["data_size"] }}</td>
-		    {% if table_data["disk_use"] >= '90%' or table_data["disk_use"] == '100%' %}
-    <td style="{{style_backup_summary_table_td}} color:red;font-weight:bold;">
-      {% else %}
-    <td style="{{style_backup_summary_table_td}}">
-      {% endif %}
-      {{ table_data["disk_use"] }}
-    </td>
-</tr>
-</tbody>
-</table>
-{% endif%}
-</div>
-</div>
-</div>
+                    <td style="{{style_backup_summary_table_td}}">
+                      {{ table_data["disk_use"] }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              {% endif%}
+            </div>
+          </div>
+        </div>
 
 
 <!-- cluster backup detail -->

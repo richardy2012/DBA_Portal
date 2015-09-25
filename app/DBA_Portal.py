@@ -206,8 +206,6 @@ def check_date(date):
     ### check_date('2000-03-03')
     ### return True
     """
-    print type(date)
-    print date
     if not (date and (type(date) is str or type(date) is unicode)):
         print 'check_date -- parameters error'
         return False
@@ -1342,6 +1340,13 @@ def backup_report():
             backup_email_backup_report = backup_list.email_backup_report()
             dba_portal_redis.set_json_with_expire('backup_email_backup_report',backup_email_backup_report,3600*6)
 
+        for backup_type in ["MySQL_cluster", "MongoDB", "MySQL_single"]:
+            if backup_email_backup_report and backup_email_backup_report[backup_type] and backup_email_backup_report[backup_type]['bak_server_infos']:
+                backup_email_backup_report[backup_type]['bak_servers'] = ''
+                backup_email_backup_report[backup_type]['disk_use'] = ''
+                for server in backup_email_backup_report[backup_type]['bak_server_infos']:
+                    backup_email_backup_report[backup_type]['bak_servers'] += (server+' ')
+                    backup_email_backup_report[backup_type]['disk_use'] += (backup_email_backup_report[backup_type]['bak_server_infos'][server]['disk_use'] + ' ')
         result = backup_email_backup_report
         file_backup = FileBackup()
         result['File_Backup'] = file_backup.get_file_backup_info()
@@ -1356,7 +1361,7 @@ def backup_report():
         result['active'] = active
 
         backup_date = request.args.get('backup_date', False)
-        if not check_date(backup_date):
+        if not (backup_date and check_date(backup_date)):
             backup_date = datetime.date.today()
             backup_date = backup_date.strftime("%Y-%m-%d")
         return render_template('backup_report.html',data=result,backup_date=backup_date)
