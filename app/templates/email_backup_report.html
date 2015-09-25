@@ -64,26 +64,24 @@
 			{% endif %}
 		      </td>
                       <td style="{{style_backup_summary_table_td}}">
-			{% if table_data["bak_server"] != '' %}
-			{{ table_data["bak_server"] }}
-			{% endif %}
-		      </td>
+                        {% for server in table_data["bak_servers"] %}
+                        {{ server }}&nbsp
+                        {% endfor %}
+                      </td>
 		      <td style="{{style_backup_summary_table_td}}">
 			{% if table_data["data_size"] != '' %}
 			{{ table_data["data_size"] }}
 			{% endif %}
 		      </td>
-		      {% if table_data["disk_use"] %}
-		      {% if table_data["disk_use"] >= '90%' or table_data["disk_use"] == '100%' %}
-		      <td style="{{style_backup_summary_table_td}} color:red;font-weight:bold;">
-			{% else %}
-		      <td style="{{style_backup_summary_table_td}}">
-			{% endif %}
-			{{ table_data["disk_use"] }}
-			{% else %}
-		      <td>
-			{% endif %}
-		      </td>
+                      <td style="{{style_backup_summary_table_td}}">
+                        {% for disk_use in table_data["disk_uses"] %}
+                        {% if disk_use >= '90%' or disk_use == '100%' %}
+                        <font size="5" face="arial" color="red">{{ disk_use }}&nbsp</font>
+                        {% else %}
+                        {{ disk_use }}&nbsp
+                        {% endif %}
+                        {% endfor %}
+                      </td>
                     </tr>
 		  </tbody>
 		</table>

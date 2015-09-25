@@ -1376,7 +1376,17 @@ def email_backup_report():
     try:
         active = request.values.get('active','MySQL')
         backup_list = BackupList()
-        result = backup_list.email_backup_report()
+        backup_email_backup_report = backup_list.email_backup_report()
+        for backup_type in ["MySQL_cluster", "MongoDB", "MySQL_single"]:
+            if backup_email_backup_report and backup_email_backup_report[backup_type] and backup_email_backup_report[backup_type]['bak_server_infos']:
+                backup_email_backup_report[backup_type]['bak_servers'] = []
+                backup_email_backup_report[backup_type]['disk_uses'] = []
+                for server in backup_email_backup_report[backup_type]['bak_server_infos']:
+                    backup_email_backup_report[backup_type]['bak_servers'].append(server)
+                    backup_email_backup_report[backup_type]['disk_uses'].append(backup_email_backup_report[backup_type]['bak_server_infos'][server]['disk_use'])
+        result = backup_email_backup_report
+
+
         file_backup = FileBackup()
         result['File_Backup'] = file_backup.get_file_backup_info()
         server_use = file_backup.get_latest_server_use(AppConfig.FILE_BACKUP_server)
