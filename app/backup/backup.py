@@ -100,7 +100,7 @@ class FileBackup(object):
         result['total'] = len(need_backup)
         items = self.get_file_backup_info_from_db()
         for item in items:
-            if item['name'] in need_backup:
+            if item['name'] in need_backup and item['file_size'] != 0:
                 result['success'] += 1
                 need_backup.remove(item['name'])
             result['data_size'] += item['file_size']
