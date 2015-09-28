@@ -6,6 +6,8 @@ from email.mime.text import MIMEText
 import urllib2
 import time
 import re
+import sys
+sys.path.append("..")
 from config import AppConfig
 
 # def add_full_path_to_url(prefix, line):
