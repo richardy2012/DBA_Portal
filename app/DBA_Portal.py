@@ -1347,13 +1347,18 @@ def backup_report():
                 for server in backup_email_backup_report[backup_type]['bak_server_infos']:
                     backup_email_backup_report[backup_type]['bak_servers'].append(server)
                     backup_email_backup_report[backup_type]['disk_uses'].append(backup_email_backup_report[backup_type]['bak_server_infos'][server]['disk_use'])
+
+        # for backup_type in ["MySQL_cluster", "MongoDB", "MySQL_single"]:
+        #     print backup_type,backup_email_backup_report[backup_type]['bak_servers']
+        #     print backup_type,backup_email_backup_report[backup_type]['disk_uses']
         result = backup_email_backup_report
         file_backup = FileBackup()
         result['File_Backup'] = file_backup.get_file_backup_info()
-        server_use = file_backup.get_latest_server_use(AppConfig.FILE_BACKUP_server)
         result['File_Backup']['disk_uses'] = []
-        if server_use:
-            result['File_Backup']['disk_uses'].append(server_use['DiskUse'])
+        for server in file_backup._file_backup_servers:
+            server_use = file_backup.get_latest_server_use(server)
+            if server_use:
+                result['File_Backup']['disk_uses'].append(server_use['DiskUse'])
 
         result = email_backup_format(result,'backup_report')
         result['page_name'] = '数据库备份日报'
@@ -1389,7 +1394,7 @@ def email_backup_report():
 
         file_backup = FileBackup()
         result['File_Backup'] = file_backup.get_file_backup_info()
-        server_use = file_backup.get_latest_server_use(AppConfig.FILE_BACKUP_server)
+        server_use = file_backup.get_latest_server_use(backup_config.FILE_BACKUP_SERVERS)
         if server_use:
             result['File_Backup']['disk_use'] = server_use['DiskUse']
         result = email_backup_format(result,'email_backup_report')

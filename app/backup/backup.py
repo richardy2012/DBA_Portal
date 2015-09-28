@@ -57,7 +57,9 @@ def is_valid_date(str_in):
         return False
 
 class FileBackup(object):
-    _file_backup_db = 'DbBak'
+    _file_backup_db = backup_config.FILE_BACKUP_DB
+    _file_backup_servers = backup_config.FILE_BACKUP_SERVERS
+    _file_backup_types = backup_config.FILE_BACKUP_TYPES
     _db = None
 
     def __init__(self):
@@ -65,7 +67,7 @@ class FileBackup(object):
                     'port':backup_config.BACKUP_INFO_DB_PORT,
                     'user':AppConfig.MYSQL_ADMIN_USR,
                     'passwd':AppConfig.MYSQL_ADMIN_PSWORD,
-                    'db':self._file_backup_db,
+                    'db':backup_config.FILE_BACKUP_DB,
                     'charset':'utf8'}
         self._db = MySQL_lightweight(dbconfig)
 
@@ -93,7 +95,7 @@ class FileBackup(object):
             'bak_server': '',
             'info': {}
             }
-        need_backup = AppConfig.FILE_BACKUP
+        need_backup = backup_config.FILE_BACKUP_TYPES
         need_backup = list(need_backup)
         result['total'] = len(need_backup)
         items = self.get_file_backup_info_from_db()
@@ -104,7 +106,7 @@ class FileBackup(object):
             result['data_size'] += item['file_size']
         result['failed'] = len(need_backup)
         result['info'] = items
-        result['bak_server'] = AppConfig.FILE_BACKUP_server
+        result['bak_servers'] = backup_config.FILE_BACKUP_SERVERS
         return result
 
     def get_latest_server_use(self, ip):
