@@ -8,148 +8,36 @@ sys.path.append("..")
 from config import AppConfig
 from db_connect.MySQL_lightweight import MySQL_lightweight
 
+def float2humanread(integer):
+    """
+    Description: translate integer into human read format(K,M,G,T,P)
+    Parameters format:
+    ### integer: 1000000
+    Example:
+    ### float2humanread(1000000)
+    ### return '1M'
+    """
+    try:
+        integer = float(integer)
+    except:
+        raise Exception('please pass a int or float into function!')
+
+    suffix_array = ['','K','M','G','T','P']
+    i = 0
+    while integer >= 1000 and i < len(suffix_array):
+        integer /= 1000
+        i += 1
+    integer = "%.2f" % integer
+    humanread = str(integer) + suffix_array[i]
+    return humanread
+
+
 class MonitorArchive():
     _dbmonitor_db = 'DBMonitor'
     _db = None
-    _monitor_ip_lists = ["10.1.125.16","10.1.125.15","10.1.125.14","10.1.101.136","10.1.6.17","10.1.125.11","10.1.125.23","10.1.6.40","10.1.6.41","10.1.6.114","10.1.6.115","10.1.110.62","10.1.110.64","10.1.125.24","10.1.125.34","10.1.101.158","10.1.101.130","10.1.125.12","10.1.125.13","10.1.125.192","10.1.101.143","10.1.101.15","10.1.101.36","10.1.101.149","10.1.101.98","10.1.101.174","10.1.101.161","10.1.6.226","10.1.6.225","10.1.6.230","10.3.10.55","10.3.10.66","10.3.10.23","10.3.10.53","10.1.101.131","10.1.101.132","10.1.101.120","10.1.101.92","10.3.10.68","10.3.10.69","10.1.110.108","10.1.110.110","10.1.1.135","10.1.1.205"]
-    _monitor_ip_dict = {
-        "10.1.125.16":"pctorder","10.1.125.15":"pctorder","10.1.125.14":"pctorder","10.1.101.136":"pctorder","10.1.6.17":"pctorder",
-        "10.1.125.11":"paybase","10.1.125.23":"paybase",
-        "10.1.6.40":"tpfun","10.1.6.41":"tpfun",
-        "10.1.6.114":"tgtp","10.1.6.115":"tgtp",
-        "10.1.110.62":"pctaccount","10.1.110.64":"pctaccount",
-        "10.1.125.24":"pctaccountaudit","10.1.125.34":"pctaccountaudit",
-        "10.1.101.158":"pctchannel","10.1.101.130":"pctchannel",
-        "10.1.125.12":"pctengine","10.1.125.13":"pctengine","10.1.125.192":"pctengine",
-        "10.1.101.143":"dianpingpct","10.1.101.15":"dianpingpct","10.1.101.36":"dianpingpct",
-        "10.1.101.149":"deal","10.1.101.98":"deal","10.1.101.174":"deal","10.1.101.161":"deal",
-        "10.1.6.226":"tpd_deal","10.1.6.225":"tpd_deal","10.1.6.230":"tpd_deal",
-        "10.3.10.55":"tgstock","10.3.10.66":"tgstock",
-        "10.3.10.23":"bonus","10.3.10.53":"bonus",
-        "10.1.101.131":"tgreceipt","10.1.101.132":"tgreceipt","10.1.101.120":"tgreceipt","10.1.101.92":"tgreceipt",
-        "10.3.10.68":"pctdiscount","10.3.10.69":"pctdiscount",
-        "10.1.110.108":"mopay","10.1.110.110":"mopay",
-        "10.1.1.135":"tgreceiptstock","10.1.1.205":"tgreceiptstock"
-    }
-    _monitor_type = [
-        'com_drop_table',
-        'com_create_index',
-        'tps',
-        'com_kill',
-        'thd_idle_thds',
-        'aborted_clients',
-        'aborted_connects',
-        'cre_tmp_tabs',
-        'com_select',
-        'tb_open_cache_overs',
-        'com_update',
-        'com_alter_table',
-        'questions',
-        'thds_conn',
-        'thds_run',
-        'delay',
-        'tb_open_cache_hits',
-        'cre_tmp_disk_tabs',
-        'com_delete',
-        'thd_thds',
-        'tb_open_cache_miss',
-        'com_drop_index',
-        'com_insert',
-        'network_out',
-        'network_in',
-        'sys',
-        'idle',
-        'wa',
-        'usr',
-        'load',
-        'swapTotal',
-        'free',
-        'swapFree',
-        'swapUsed',
-        'used',
-        'inn_row_lk_time_avg',
-        'inn_deadlocks',
-        'inn_row_lk_time_max',
-        'inn_mutex_spin_waits',
-        'inn_mutex_spin_rounds',
-        'inn_curr_row_lks',
-        'inn_mutex_os_waits',
-        'inn_row_lk_waits',
-        'inn_x_lk_spin_waits',
-        'tb_lks_waited',
-        'inn_s_lk_os_waits',
-        'inn_row_lk_curr_waits',
-        'inn_s_lk_spin_rounds',
-        'inn_row_lk_time',
-        'inn_bp_wait_free',
-        'inn_x_lk_os_waits',
-        'inn_log_waits',
-        'tb_lks_immediate',
-        'inn_s_lk_spin_waits',
-        'inn_x_lk_spin_rounds',
-        'inn_rows_updated',
-        'inn_rows_inserted',
-        'inn_data_preads',
-        'inn_ibuf_mer',
-        'inn_his_list_len',
-        'inn_bp_pgs_tot',
-        'slow_queries',
-        'inn_bp_pgs_md_noty',
-        'inn_log_write_req',
-        'inn_ibuf_free_list',
-        'inn_os_log_fsyncs',
-        'inn_os_log_pfsyncs',
-        'inn_ckp_max_age',
-        'created_tmp_files',
-        'inn_bp_reads',
-        'bytes_sent',
-        'inn_bp_pgs_old',
-        'inn_bp_read_ah_evi',
-        'bytes_received',
-        'queries',
-        'inn_log_writes',
-        'inn_ibuf_mer_ins',
-        'inn_pgs_cre',
-        'inn_data_pwrites',
-        'inn_bp_pgs_lru_flu',
-        'inn_data_pfsyncs',
-        'modified_age',
-        'inn_rows_del',
-        'inn_data_written',
-        'inn_bp_pgs_flu',
-        'inn_data_writes',
-        'inn_pread',
-        'inn_bp_pgs_misc',
-        'sort_scan',
-        'inn_data_reads',
-        'inn_bp_read_ah',
-        'inn_bp_pgs_made_y',
-        'inn_data_read',
-        'inn_bp_pgs_dirty',
-        'inn_ibuf_mer_dels',
-        'inn_os_log_written',
-        'handler_commit',
-        'inn_bp_pgs_free',
-        'inn_bp_wri_req',
-        'handler_rollback',
-        'sort_range',
-        'inn_data_fsyncs',
-        'inn_ava_ulogs',
-        'inn_bp_read_req',
-        'inn_ckp_age',
-        'inn_pwritten',
-        'inn_bp_read_ah_rnd',
-        'sort_rows',
-        'sort_merge_pas',
-        'inn_ibuf_mer_del_mks',
-        'inn_os_log_pwrites',
-        'io_reads',
-        'io_writes',
-        'io_util',
-        'iops',
-        'diskUsedRatio',
-        'diskAvail'
-    ]
+    _monitor_ip_lists = monitor_config.MONITOR_IP_LIST_917
+    _monitor_ip_dict = monitor_config.MONITOR_IP_DICT_917
+    _monitor_type = monitor_config.MONITOR_TYPE
 
     def __init__(self):
         dbconfig = {'host':monitor_config.DBMONITOR_DB_IP,
@@ -191,8 +79,7 @@ class MonitorArchive():
         rows = self._db.fetchAllArray();
         for row in rows:
             row['max_show'] = row['max_value'] if row['max_value'] else '0'
-            if monitor_type in ['questions','tps','iops']:
-                row['max_show'] = (str(row['max_value']/1000) + 'K')
+            row['max_show'] = float2humanread(row['max_value'])
         return rows
 
     def archive_instance(self, ip, date):
