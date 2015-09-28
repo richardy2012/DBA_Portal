@@ -7,3 +7,4 @@ env/
 *config.py
 *.log
 app/monitor/917archive/
+app/load_test/

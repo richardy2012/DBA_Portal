@@ -1,0 +1,10 @@
+<uwsgi>
+  <pythonpath>/usr/local/app/DBA_Portal/app</pythonpath>
+  <module>RealTimeMonitor</module>
+  <callable>app</callable>
+  <socket>127.0.0.1:9001</socket>
+  <master/>
+  <processes>4</processes>
+  <threads>4</threads>
+  <memory-report/>
+</uwsgi>
