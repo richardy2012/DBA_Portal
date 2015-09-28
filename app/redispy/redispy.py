@@ -13,6 +13,14 @@ from cmdb.server import ServerList
 from cmdb.instance import InstanceList
 from backup.backup import BackupList
 
+class RTMRedis(object):
+    _redis = None
+
+    def __init__(self):
+        self._redis = redis.StrictRedis(host=redispy_config.RTMREDIS_IP, port=redispy_config.RTMREDIS_PORT, encoding='utf-8')
+
+
+
 class DBAPortalRedis(object):
     _redis = None
 
