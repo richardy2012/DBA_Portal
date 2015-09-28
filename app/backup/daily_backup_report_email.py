@@ -71,7 +71,9 @@ def send_email(sender, receiver, subject, content, ctype="html", smtpserver='mai
             msg['Subject'] = subject
             msg['From'] = sender
             msg['To'] = receiver
-            print server.sendmail(sender, receiver.split(','), msg.as_string())
+            now = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+            print '%s ----' % now
+            server.sendmail(sender, receiver.split(','), msg.as_string())
             server.close()
             return 'Send Email to %s SUCCESS!' % receiver
         except Exception,e:
