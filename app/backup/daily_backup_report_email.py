@@ -3,6 +3,7 @@
 import requests
 import smtplib
 from email.mime.text import MIMEText
+from email import Utils
 import urllib2
 import time
 import re
@@ -71,6 +72,8 @@ def send_email(sender, receiver, subject, content, ctype="html", smtpserver='mai
             msg['Subject'] = subject
             msg['From'] = sender
             msg['To'] = receiver
+            msg['Message-ID'] = Utils.make_msgid()
+            msg['date']=time.strftime('%a, %d %b %Y %H:%M:%S %z')
             now = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
             print '%s ----' % now
             server.sendmail(sender, receiver.split(','), msg.as_string())
@@ -95,16 +98,16 @@ if __name__ == '__main__':
     sender = 'portal_dba@dianping.com'
     if 'cluster_backup_report_detail' in content:
         receiver = AppConfig.SEND_TO
-        subject =  '数据库备份日报'
+        subject =  u'数据库备份日报'
         message = content
         print send_email(sender, receiver, subject, message)
     elif ('Connection aborted' in content and '10.1.1.193' in content and 'read timeout' in content and 'Fail to call CMDB service' in content):
         receiver = AppConfig.SEND_TO_DEV
-        subject = '5000服务出错！！！'
-        message= '数据库备份日报, dev:192.168.222.156; online:10.1.1.193;'
+        subject = u'5000服务出错！！！'
+        message= u'数据库备份日报, dev:192.168.222.156; online:10.1.1.193;'
         print send_email(sender, receiver, subject, message)
     else:
         receiver = AppConfig.SEND_TO_DEV
-        subject = 'PORTAl服务出错！！！'
-        message = '数据库备份日报, dev:192.168.222.156; online:10.1.1.193;'
+        subject = u'PORTAl服务出错！！！'
+        message = u'数据库备份日报, dev:192.168.222.156; online:10.1.1.193;'
         print send_email(sender, receiver, subject, message)
