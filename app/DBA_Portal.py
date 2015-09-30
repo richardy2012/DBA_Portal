@@ -21,7 +21,7 @@ from backup.backup import FileBackup, BackupList
 from monitor.monitor import Monitor
 from monitor.archive917 import MonitorArchive
 
-from redispy.redispy import DBAPortalRedis
+from redispy.redispy import DBAPortalRedis,RTMRedis
 
 try:
     from urllib import urlopen
@@ -1611,11 +1611,46 @@ def rtm_dashboard():
     try:
         data = {}
         data['page_name'] = "秒级监控－大盘"
+        rtmredis = RTMRedis()
+        pipeline = rtmredis._redis.pipeline()
+        for mtype in ['iops','diskUsedRatio']:
+            redis_key = 'rtm:dashboard:' + str(mtype)
+            pipeline.zrevrange(redis_key,0,11,withscores=True)
+        response = pipeline.execute()
+        i = 0
+        result = {}
+        for mtype in ['iops','diskUsedRatio']:
+            result[mtype] = response[i]
+            i += 1
+        data['page_data'] = result
+        print result
         return render_template('rtm_dashboard.html',data=data)
     except Exception,e:
         app.logger.error(str(e))
         flash(e,'danger')
         return render_template('blank.html')
+
+@app.route("/rtm_dashboard_update",methods=['POST','GET'])
+def rtm_dashboard_update():
+#    if not have_accessed():
+#        return redirect(url_for('login'))
+    try:
+        rtmredis = RTMRedis()
+        pipeline = rtmredis._redis.pipeline()
+        for mtype in ['iops','diskUsedRatio']:
+            redis_key = 'rtm:dashboard:' + str(mtype)
+            pipeline.zrevrange(redis_key,0,11,withscores=True)
+        response = pipeline.execute()
+        i = 0
+        result = {}
+        for mtype in ['iops','diskUsedRatio']:
+            result[mtype] = response[i]
+            i += 1
+        print result
+        return json.dumps(result)
+    except Exception,e:
+        app.logger.error(str(e))
+        return json.dumps([])
 
 @app.route("/rtm_optional",methods=['POST','GET'])
 def rtm_optional():
@@ -1627,7 +1662,6 @@ def rtm_optional():
         return render_template('rtm_optional.html',data=data)
     except Exception,e:
         app.logger.error(str(e))
-        flash(e,'danger')
         return render_template('blank.html')
 
 # @app.route("/query_monitor",methods=['POST','GET'])

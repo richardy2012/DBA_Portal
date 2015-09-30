@@ -3,11 +3,54 @@
 {%  set level2_name='rtm_dashboard' %}
 {% block page_wrapper %}
 
+<script>
+</script>
 
+<!-- <button onclick="auto_update()">测试刷新<>/button> -->
+<!-- cluster detail-->
+<div class="row">
+  <div class="col-lg-12">
+    <div id="rtm_dashboard_topN">
+    </div>
+  </div>
+</div>
+
+<div>
+  <input type="hidden" name="data_transfer" id="data_transfer" value="{{data['page_data']}}">
+</div>
 
 {% endblock %}
 {% block script %}
 {{ super() }}
 <script>
+  $(document).ready(auto_update);
+  function auto_update() {
+    var url = "rtm_dashboard_update";
+    var xmlHttp=new XMLHttpRequest();
+    xmlHttp.open( "GET",url, false );
+    xmlHttp.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+    xmlHttp.send();
+    page_data = xmlHttp.responseText;
+    $('#rtm_dashboard_topN').html(generate_rtm_dashboard_div(page_data));
+    setTimeout(auto_update, 10000);
+  }
+
+  function generate_rtm_dashboard_div(page_data) {
+    page_data = JSON.parse(page_data)
+    var div_html = ""
+    for (mtype in page_data) {
+      div_html += ("<table style='float:left' border='2' id='rtm_dashboard_"+mtype+"'><thead><tr><th>Instance</th><th>"+mtype+"</th></tr></thead><tbody>")
+      for (statistic in page_data[mtype]) {
+        rtm_dashboard_style = ""
+
+        if (page_data[mtype][statistic][1] > 50) {
+          rtm_dashboard_style = "'background-color:red;color:white;''"
+        }
+        div_html += ("<tr><td style="+rtm_dashboard_style+">"+page_data[mtype][statistic][0]+"</td><td style="+rtm_dashboard_style+">"+page_data[mtype][statistic][1]+"</td><tr>")
+      }
+      div_html += ("</tbody></table>")
+    }
+    return div_html
+  }
 </script>
 {% endblock %}

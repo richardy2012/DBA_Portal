@@ -3,6 +3,10 @@ import requests,json
 import sys,time,re,datetime,os,random
 import redis
 from flask import Flask, request
+sys.path.append("..")
+from config import AppConfig
+from db_connect.MySQL_lightweight import MySQL_lightweight
+from redispy.redispy import RTMRedis
 
 app = Flask(__name__)
 
@@ -32,12 +36,20 @@ def get_parameters_from_url(request_url=request,query_key=None):
 @app.route("/dbmon/<instance>", methods=['GET', 'POST'])
 def dbmon(instance=None):
     try:
-        supported_query_key = ['ip']
+        supported_query_key = ['ip','port','timestamp','iops','diskUsedRatio']
         query_condition = get_parameters_from_url(request,supported_query_key)
-        if query_condition.has_key('ip'):
-            print query_condition['ip']
+        if query_condition.has_key('ip') and query_condition.has_key('port'):
+            rtmredis = RTMRedis()
+            pipeline = rtmredis._redis.pipeline()
+            instance = query_condition['ip'] + ':' + str(query_condition['port'])
+            for mtype in query_condition:
+                if mtype not in ['ip','port','timestamp']:
+                    #print mtype,query_condition[mtype],float(query_condition[mtype])
+                    redis_key = 'rtm:dashboard:' + str(mtype)
+                    pipeline.zadd(redis_key,float(query_condition[mtype]),instance)
+            pipeline.execute()
         else:
-            print 'error'
+            print '%s -- error: should have ip and port!' % time.strftime('%Y-%m-%d %H-%M-%S')
         return 'OK'
     except Exception, e:
         msg = "%s: %s" % (type(e).__name__, e.message)
