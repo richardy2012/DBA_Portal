@@ -1613,7 +1613,7 @@ def rtm_dashboard():
         data['page_name'] = "秒级监控－大盘"
         rtmredis = RTMRedis()
         pipeline = rtmredis._redis.pipeline()
-        mtype_threshold = {'io_reads':142557,'io_writes':44236,'iops':300,'diskUsedRatio':90,'io_util':1474914,'diskAvail':1442350}
+        mtype_threshold = {'io_reads':{'danger':110095,'warning':110080},'io_writes':{'danger':12095,'warning':12080},'iops':{'danger':13095,'warning':13080},'diskUsedRatio':{'danger':1295,'warning':1280},'io_util':{'danger':120095,'warning':120080},'diskAvail':{'danger':12000095,'warning':12000080}}
         data['mtype_threshold'] = json.dumps(mtype_threshold)
         return render_template('rtm_dashboard.html',data=data)
     except Exception,e:

@@ -45,9 +45,13 @@
       for (statistic in page_data[mtype]) {
         rtm_dashboard_style = ""
 
-        if (page_data[mtype][statistic][1] > mtype_threshold[mtype]) {
+        if (page_data[mtype][statistic][1] > mtype_threshold[mtype]['danger']) {
           rtm_dashboard_style = "'background-color:red;color:white;''"
         }
+        else if (page_data[mtype][statistic][1] > mtype_threshold[mtype]['warning']) {
+          rtm_dashboard_style = "'background-color:#ffb44b;color:white;''"
+        }
+
         div_html += ("<tr><td style="+rtm_dashboard_style+">"+page_data[mtype][statistic][0]+"</td><td style="+rtm_dashboard_style+">"+page_data[mtype][statistic][1]+"</td><tr>")
       }
       div_html += ("</tbody></table>")
