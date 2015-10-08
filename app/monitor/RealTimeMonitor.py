@@ -4,8 +4,6 @@ import sys,time,re,datetime,os,random
 import redis
 from flask import Flask, request
 sys.path.append("..")
-from config import AppConfig
-from db_connect.MySQL_lightweight import MySQL_lightweight
 from redispy.redispy import RTMRedis
 
 app = Flask(__name__)
