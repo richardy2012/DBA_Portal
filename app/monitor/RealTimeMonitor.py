@@ -36,14 +36,14 @@ def get_parameters_from_url(request_url=request,query_key=None):
 @app.route("/dbmon/<instance>", methods=['GET', 'POST'])
 def dbmon(instance=None):
     try:
-        supported_query_key = ['ip','port','timestamp','iops','diskUsedRatio']
+        supported_query_key = ['port','timestamp','io_reads','io_writes','iops','diskUsedRatio','io_util','diskAvail']
         query_condition = get_parameters_from_url(request,supported_query_key)
-        if query_condition.has_key('ip') and query_condition.has_key('port'):
+        if instance and query_condition.has_key('port'):
             rtmredis = RTMRedis()
             pipeline = rtmredis._redis.pipeline()
-            instance = query_condition['ip'] + ':' + str(query_condition['port'])
+            instance = instance + ':' + str(query_condition['port'])
             for mtype in query_condition:
-                if mtype not in ['ip','port','timestamp']:
+                if mtype not in ['port','timestamp']:
                     #print mtype,query_condition[mtype],float(query_condition[mtype])
                     redis_key = 'rtm:dashboard:' + str(mtype)
                     pipeline.zadd(redis_key,float(query_condition[mtype]),instance)

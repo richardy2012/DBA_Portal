@@ -16,7 +16,7 @@
 </div>
 
 <div>
-  <input type="hidden" name="data_transfer" id="data_transfer" value="{{data['page_data']}}">
+  <input type="hidden" name="mtype_threshold" id="mtype_threshold" value="{{data['mtype_threshold']}}">
 </div>
 
 {% endblock %}
@@ -32,18 +32,20 @@
     xmlHttp.send();
     page_data = xmlHttp.responseText;
     $('#rtm_dashboard_topN').html(generate_rtm_dashboard_div(page_data));
-    setTimeout(auto_update, 10000);
+    setTimeout(auto_update, 5000);
   }
 
   function generate_rtm_dashboard_div(page_data) {
     page_data = JSON.parse(page_data)
+    var mtype_threshold = $('#mtype_threshold').val()
+    mtype_threshold = JSON.parse(mtype_threshold)
     var div_html = ""
     for (mtype in page_data) {
-      div_html += ("<table style='float:left' border='2' id='rtm_dashboard_"+mtype+"'><thead><tr><th>Instance</th><th>"+mtype+"</th></tr></thead><tbody>")
+      div_html += ("<table style='float:left' border='1' id='rtm_dashboard_"+mtype+"'><thead><tr><th>Instance</th><th>"+mtype+"</th></tr></thead><tbody>")
       for (statistic in page_data[mtype]) {
         rtm_dashboard_style = ""
 
-        if (page_data[mtype][statistic][1] > 50) {
+        if (page_data[mtype][statistic][1] > mtype_threshold[mtype]) {
           rtm_dashboard_style = "'background-color:red;color:white;''"
         }
         div_html += ("<tr><td style="+rtm_dashboard_style+">"+page_data[mtype][statistic][0]+"</td><td style="+rtm_dashboard_style+">"+page_data[mtype][statistic][1]+"</td><tr>")

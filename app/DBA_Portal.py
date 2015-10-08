@@ -1613,17 +1613,8 @@ def rtm_dashboard():
         data['page_name'] = "秒级监控－大盘"
         rtmredis = RTMRedis()
         pipeline = rtmredis._redis.pipeline()
-        for mtype in ['iops','diskUsedRatio']:
-            redis_key = 'rtm:dashboard:' + str(mtype)
-            pipeline.zrevrange(redis_key,0,11,withscores=True)
-        response = pipeline.execute()
-        i = 0
-        result = {}
-        for mtype in ['iops','diskUsedRatio']:
-            result[mtype] = response[i]
-            i += 1
-        data['page_data'] = result
-        print result
+        mtype_threshold = {'io_reads':142557,'io_writes':44236,'iops':300,'diskUsedRatio':90,'io_util':1474914,'diskAvail':1442350}
+        data['mtype_threshold'] = json.dumps(mtype_threshold)
         return render_template('rtm_dashboard.html',data=data)
     except Exception,e:
         app.logger.error(str(e))
@@ -1637,13 +1628,14 @@ def rtm_dashboard_update():
     try:
         rtmredis = RTMRedis()
         pipeline = rtmredis._redis.pipeline()
-        for mtype in ['iops','diskUsedRatio']:
+        supported_mtypes = ['io_reads','io_writes','iops','diskUsedRatio','io_util','diskAvail']
+        for mtype in supported_mtypes:
             redis_key = 'rtm:dashboard:' + str(mtype)
             pipeline.zrevrange(redis_key,0,11,withscores=True)
         response = pipeline.execute()
         i = 0
         result = {}
-        for mtype in ['iops','diskUsedRatio']:
+        for mtype in supported_mtypes:
             result[mtype] = response[i]
             i += 1
         print result
