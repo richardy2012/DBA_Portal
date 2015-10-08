@@ -1,5 +1,5 @@
 # coding: utf8
-import requests,json
+import json
 import sys,time,re,datetime,os,random
 import redis
 from flask import Flask, request
