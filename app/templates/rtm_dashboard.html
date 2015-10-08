@@ -32,7 +32,7 @@
     xmlHttp.send();
     page_data = xmlHttp.responseText;
     $('#rtm_dashboard_topN').html(generate_rtm_dashboard_div(page_data));
-    setTimeout(auto_update, 3000);
+    setTimeout(auto_update, 1500);
   }
 
   function generate_rtm_dashboard_div(page_data) {
