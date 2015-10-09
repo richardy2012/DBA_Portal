@@ -1779,7 +1779,7 @@ def login():
         app.config.setdefault('CAS_LOGOUT_ROUTE', AppConfig.CAS_LOGOUT_ROUTE)
         app.config.setdefault('CAS_VALIDATE_ROUTE', AppConfig.CAS_VALIDATE_ROUTE)
         app.config.setdefault('CAS_SERVER', AppConfig.CAS_SERVER)
-        app.config.setdefault('CAS_AFTER_LOGIN', flask.url_for('rtm_dashboard'))
+        app.config.setdefault('CAS_AFTER_LOGIN', flask.url_for('dashboard'))
 
         cas_token_session_key = current_app.config['CAS_TOKEN_SESSION_KEY']
         redirect_url = create_cas_login_url(
