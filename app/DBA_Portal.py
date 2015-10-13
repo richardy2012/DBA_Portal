@@ -543,16 +543,18 @@ def server_list():
 
         dba_portal_redis = DBAPortalRedis()
         server_list = ServerList()
-        server_all = dba_portal_redis.get_json('server_all')
+        #server_all = dba_portal_redis.get_json('server_all')
+        server_all = ''
         if not server_all:
             server_all = server_list.list_all()
-            dba_portal_redis.set_json_with_expire('server_all', server_all, dba_portal_redis._expire_server_all)
+            #dba_portal_redis.set_json_with_expire('server_all', server_all, dba_portal_redis._expire_server_all)
 
         instance_list = InstanceList()
-        instance_all = dba_portal_redis.get_json('instance_all')
+        #instance_all = dba_portal_redis.get_json('instance_all')
+        instance_all = ''
         if not instance_all:
             instance_all = instance_list.list_all()
-            dba_portal_redis.set_json_with_expire('instance_all', instance_all, dba_portal_redis._expire_instance_all)
+            #dba_portal_redis.set_json_with_expire('instance_all', instance_all, dba_portal_redis._expire_instance_all)
         instances = [instance['server_ip'] for instance in instance_all]
 
         #filtered_servers = all_servers.list_all(data=query_condition)
@@ -561,6 +563,10 @@ def server_list():
         have_instance = []
         no_instance = []
         recently_apply = []
+        print '!-------all instances-------------!'
+        print len(instance_all)
+        print '#-------all servers-------------#'
+        print len(filtered_servers)
         for server in filtered_servers:
             dba_owner = get_value_from_string(server['comment'],'dba')
             server['dba_owner'] = dba_owner
@@ -701,7 +707,7 @@ def install_db(db_type=None):
         instance_list = InstanceList()
         page_data = server_list.list_all(data={"private_ip":request_value})
         page_data[0]['serverid'] = request_value
-        instance_data = instance_list.list_all(data=dict(server_ip=request_value))
+        instance_data = instance_list.list_all(data={"server_ip":request_value})
         if len(page_data) < 1:
             flash(json.dumps(page_data),'danger')
             return render_template('blank.html')
@@ -724,6 +730,7 @@ def install_db(db_type=None):
         if not page_data:
             raise Exception('您选择的服务器信息有误')
         data['page_data'] = page_data
+        print page_data
         data['instance_data'] = instance_data
         data['form'] = filter_form
         if db_type == 'mysql':

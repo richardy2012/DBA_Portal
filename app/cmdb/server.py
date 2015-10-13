@@ -234,10 +234,10 @@ class ServerList(CmdbApiBase):
         if db_type == "mysql":
             versions = ["Percona-5.1.58-OS5-x86_64","Percona-5.1.58-OS6-x86_64","Percona-5.6.19-OS6-x86_64","Percona-5.6.24-OS6-x86_64"]
         elif db_type == "mongodb":
-            versions = ["2.0.7","2.0.9","2.2.4","2.4.4","2.6.9","3.0.1","3.0.4"]
+            versions = ["2.0.7","2.0.9","2.2.4","2.4.4","2.6.9","3.0.1","3.0.6"]
         elif db_type == "memcache":
             versions = ["Memcached-1.4.15-OS6-x86_64","Memcached-1.4.15-OS5-x86_64"]
-        
+
         version_list = list()
         version_list.append('')
         for version in versions:
