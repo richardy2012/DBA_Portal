@@ -563,10 +563,10 @@ def server_list():
         have_instance = []
         no_instance = []
         recently_apply = []
-        print '!-------all instances-------------!'
-        print len(instance_all)
-        print '#-------all servers-------------#'
-        print len(filtered_servers)
+        # print '!-------all instances-------------!'
+        # print type(instance_all),len(instance_all)
+        # print '#-------all servers-------------#'
+        # print type(filtered_servers),len(filtered_servers)
         for server in filtered_servers:
             dba_owner = get_value_from_string(server['comment'],'dba')
             server['dba_owner'] = dba_owner

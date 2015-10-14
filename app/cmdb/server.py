@@ -9,11 +9,18 @@ class ServerList(CmdbApiBase):
 
     def list_all(self, data=None):
         #result = self.__call_serverlist_interface__('api/v0.1/products/DBA/devices', json_obj=data)
+        flag = 0
         if data:
             data['count'] = 1000
         else:
             data = {'count':1000}
+            flag = 1
         result = requests.get('http://api.cmdb.dp/api/v0.1/products/DBA/devices',data=data,timeout=20).json()
+        while flag == 1 and len(result['devices']) != result['numfound']:
+            result = requests.get('http://api.cmdb.dp/api/v0.1/products/DBA/devices',data=data,timeout=20).json()
+        # print 'return from cmdb: %d' % len(result['devices'])
+        # print data
+
         if 'sn' in data and len(result['devices']) ==0:
             data['server_sn'] = data.pop('sn')
             #result = requests.get('http://api.cmdb.dp/api/v0.1/products/DBA/devices',data=data,timeout=3).json()
