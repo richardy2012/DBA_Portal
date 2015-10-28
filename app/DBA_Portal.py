@@ -538,8 +538,8 @@ def standby_list():
 
 @app.route("/server_list")
 def server_list():
-    # if not have_accessed():
-    #     return redirect(url_for('login'))
+    if not have_accessed():
+        return redirect(url_for('login'))
     try:
         supported_query_key = ['ram_size', 'idc', 'logic_cpu_count']
         query_condition = get_parameters_from_url(request,supported_query_key)
@@ -693,8 +693,8 @@ def applyresult():
 
 @app.route("/install/<db_type>")
 def install_db(db_type=None):
-    # if not have_accessed():
-    #     return redirect(url_for('login'))
+    if not have_accessed():
+        return redirect(url_for('login'))
     if not db_type:
         return redirect(url_for('serverlist'))
     try:
@@ -834,9 +834,6 @@ def add_server():
 
 @app.route('/get_product/<bu>')
 def get_product(bu):
-    # if not have_accessed():
-    #     return redirect(url_for('login'))
-
     try:
         #dba_portal_redis = DBAPortalRedis()
         #key = 'product_bu_' + str(hash(bu))
@@ -1258,8 +1255,8 @@ def backup_history():
 
 @app.route("/backup_center")
 def backup_center():
-#    if not have_accessed():
-#        return redirect(url_for('login'))
+    if not have_accessed():
+        return redirect(url_for('login'))
     try:
         backup_list = BackupList()
         #dba_portal_redis = DBAPortalRedis()
