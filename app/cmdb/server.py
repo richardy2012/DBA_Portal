@@ -9,21 +9,17 @@ class ServerList(CmdbApiBase):
 
     def list_all(self, data=None):
         #result = self.__call_serverlist_interface__('api/v0.1/products/DBA/devices', json_obj=data)
-        flag = 0
         if data:
             data['count'] = 1000
         else:
             data = {'count':1000}
-            flag = 1
-        result = requests.get('http://api.cmdb.dp/api/v0.1/products/DBA/devices',data=data,timeout=20).json()
-        while flag == 1 and len(result['devices']) != result['numfound']:
-            result = requests.get('http://api.cmdb.dp/api/v0.1/products/DBA/devices',data=data,timeout=20).json()
-        # print 'return from cmdb: %d' % len(result['devices'])
-        # print data
-
+        url = "http://api.cmdb.dp/api/v0.1/products/DBA/devices?"
+        for para in data:
+            url += (para + '=' + str(data[para]) + '&')
+        print url
+        result = requests.get(url,timeout=20).json()
         if 'sn' in data and len(result['devices']) ==0:
             data['server_sn'] = data.pop('sn')
-            #result = requests.get('http://api.cmdb.dp/api/v0.1/products/DBA/devices',data=data,timeout=3).json()
         for dev in result['devices']:
             dev['private_ip'] = dev['private_ip'][0]
             if 'server_sn' in dev:
@@ -263,7 +259,7 @@ class ServerList(CmdbApiBase):
             ports = [27017,27018,27019,27117,27118,27119]
         elif db_type == "memcache":
             ports = [11211,11212,11213,11214,11215,11216,11217,11218,11219,11220,11221]
-        
+
         for i in instance:
             if i["port"] in ports and i['status'] != u'未初始化':
                 ports.remove(i["port"])
@@ -276,7 +272,17 @@ class ServerList(CmdbApiBase):
 
     def list_supported_biz(self):
         #result = self.__call_interface__('CMDB', 'getdatacenter')
-        result = ["交易前台","大搜索和基础体验部","平台产品部","平台技术中心","企业系统","预定外卖与企业发展","推广结婚亲子家装","未知BU","商家平台","交易后台"]
+        result = ["平台技术中心",
+                  "搜索和精准触达",
+                  "交易前台",
+                  "未知bu",
+                  "数据营销与安全",
+                  "广告平台技术",
+                  "平台产品部",
+                  "点评微生活",
+                  "POI",
+                  "企业平台",
+                  "商家平台与服务技术"]
         env_list = list()
         env_list.append('')
         if result:

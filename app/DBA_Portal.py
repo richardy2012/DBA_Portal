@@ -245,10 +245,15 @@ def fill_install_db_form(server_form=None, db_type=None, instance=None, comment=
     server_list = ServerList()
     owner_list = server_list.list_supported_dba()
     biz_list = server_list.list_supported_biz()
+    print biz_list
+    print 'in1'
+    print comment
     if comment.has_key('bu') and comment['bu']:
         biz_li = get_product(comment['bu'])
-        if biz_li:
-            biz_li = json.loads(biz_li)
+        biz_li = json.loads(biz_li)
+        if not biz_li:
+            biz_li = ['','未知']
+        #biz_li = json.loads(biz_li)
         biz_list = zip(biz_li,biz_li)
 
     server_form.dba_owner.choices = owner_list
@@ -506,11 +511,9 @@ def standby_list():
         if not server_available:
             server_available = server_list.list_available()
             #dba_portal_redis.set_json_with_expire('server_available', server_available, dba_portal_redis._expire_server_available)
-
         page_data = server_available
         filter_form = StandbyServerInfoForm()
         filter_form = fill_standby_server_info_form(server_form=filter_form, **query_condition)
-
         message_list = ({'from': 'admin', 'time': '2013-01-01', 'content': 'This is a test message'},)
         task_list = ({'name': 'task 1', 'progress': 10},)
         data['message_list'] = message_list
@@ -535,12 +538,11 @@ def standby_list():
 
 @app.route("/server_list")
 def server_list():
-    if not have_accessed():
-        return redirect(url_for('login'))
+    # if not have_accessed():
+    #     return redirect(url_for('login'))
     try:
         supported_query_key = ['ram_size', 'idc', 'logic_cpu_count']
         query_condition = get_parameters_from_url(request,supported_query_key)
-
         dba_portal_redis = DBAPortalRedis()
         server_list = ServerList()
         #server_all = dba_portal_redis.get_json('server_all')
@@ -691,8 +693,8 @@ def applyresult():
 
 @app.route("/install/<db_type>")
 def install_db(db_type=None):
-    if not have_accessed():
-        return redirect(url_for('login'))
+    # if not have_accessed():
+    #     return redirect(url_for('login'))
     if not db_type:
         return redirect(url_for('serverlist'))
     try:
@@ -717,7 +719,11 @@ def install_db(db_type=None):
             comment = 'a:b'
         comment = parse_comment_string(comment)
         flash(json.dumps(comment))
+        print '#---------------#'
+        print filter_form,db_type,instance_data,comment
+        print 'h0'
         filter_form = fill_install_db_form(server_form=filter_form,db_type=db_type,instance=instance_data,comment=comment)
+        print 'h1'
         message_list = ({'from': 'admin', 'time': '2013-01-01', 'content': 'This is a test message'},)
         task_list = ({'name': 'task 1', 'progress': 10},)
         data['message_list'] = message_list
@@ -727,6 +733,7 @@ def install_db(db_type=None):
         data['user_priv'] = flask.session['USER_PRIV'] if flask.session and flask.session['USER_PRIV'] else ''
         data['user_code'] = app.config['USER_CODE']
         data['db_type'] = db_type
+        print 'h2'
         if not page_data:
             raise Exception('您选择的服务器信息有误')
         data['page_data'] = page_data
@@ -827,15 +834,14 @@ def add_server():
 
 @app.route('/get_product/<bu>')
 def get_product(bu):
-    if not have_accessed():
-        return redirect(url_for('login'))
+    # if not have_accessed():
+    #     return redirect(url_for('login'))
 
     try:
         #dba_portal_redis = DBAPortalRedis()
         #key = 'product_bu_' + str(hash(bu))
         #product_bu = dba_portal_redis.get_product_bu(key) if dba_portal_redis._redis.exists(key) else ''
         product_bu = ''
-
         if not product_bu:
             product_bu = []
             url = "http://api.cmdb.dp/api/v0.1/bu/"+bu+"/products"
