@@ -698,6 +698,9 @@ def install_db(db_type=None):
     if not db_type:
         return redirect(url_for('serverlist'))
     try:
+        if db_type == 'mysql':
+            flash('Can not install mysql ant more.','danger')
+            return render_template('blank.html')
         data = dict()
         query_condition = dict()
         request_value = request.args.get('serverid', False)
